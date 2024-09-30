@@ -17,7 +17,7 @@ public class BuildingCreator : Singleton<BuildingCreator>
     [SerializeField] private GameObject categoryItemPrefab; // 동적으로 생성될 셀렉터 UI 중에서 각각의 BuildingObject 아이콘 하나
     [SerializeField] private Tilemap previewTileMap, defaultMap;
     
-    [SerializeField] int buildingObjectUISize = 50;
+    [SerializeField] int buildingObjectUISize = 48;
     
     private PlayerInput _playerInput;
     private Vector2 _mousePos;
@@ -177,10 +177,10 @@ public class BuildingCreator : Singleton<BuildingCreator>
         {
             var inst = Instantiate(categoryPrefab, Vector3.zero, Quaternion.identity);
             inst.transform.SetParent(uiParent, false);
-            inst.name = category.name;
+            inst.name = "Category_" + category.name;
             inst.GetComponentInChildren<TextMeshProUGUI>().text = category.name;
             inst.transform.SetSiblingIndex(category.SiblingIndex);
-            inst.GetComponentInChildren<Image>().color = category.BackgroundColor;
+            // inst.GetComponentInChildren<Image>().color = category.BackgroundColor;
 
             uiCategories[category] = inst; // 이 'category' 의 셀렉터UI 부모는 'inst' 이다.
             buildingObjectItemSlot[inst] = inst.transform.Find("Items"); // 이 셀렉터UI 안에서 아이템들이 추가되어 갈 곳은 'inst.transform.Find("Items")'
