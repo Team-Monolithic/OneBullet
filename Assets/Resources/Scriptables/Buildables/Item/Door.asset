@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a58fddfceb360943b923c1647a2ad8c, type: 3}
   m_Name: Door
   m_EditorClassIdentifier: 
-  buildingCategory: {fileID: 11400000, guid: 94f8a4099368cd0459635893d3965d64, type: 2}
+  buildingCategory: {fileID: 11400000, guid: 4798a4b2704a2824e8ff617023d1011c, type: 2}
   uiCategory: {fileID: 11400000, guid: 3b907b209db21f24ca8df56f22c2b9f1, type: 2}
   tileBase: {fileID: 11400000, guid: 4dbac6a23a7c46949b641b9974d40d8e, type: 2}
+  placeType: 1
