@@ -19,6 +19,7 @@ public class BuildingObjectBase : ScriptableObject
     [SerializeField] private UICategory uiCategory; // 어떤 UI카테고리에 속하는지
     [SerializeField] private TileBase tileBase; // 실질적으로 배치될 타일
     [SerializeField] private PlaceType placeType; // 설치 타입
+    [SerializeField] private string displayName; // 화면에 보일 이름
     [SerializeField] public string tag;
     
     // Public Getter
@@ -26,4 +27,5 @@ public class BuildingObjectBase : ScriptableObject
     public TileBase TileBase => tileBase;
     public UICategory UICategory => uiCategory;
     public PlaceType PlaceType => placeType;
+    public string DisplayName => displayName;
 }

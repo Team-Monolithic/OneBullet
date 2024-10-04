@@ -16,3 +16,5 @@ MonoBehaviour:
   uiCategory: {fileID: 11400000, guid: 3b907b209db21f24ca8df56f22c2b9f1, type: 2}
   tileBase: {fileID: 11400000, guid: 4dbac6a23a7c46949b641b9974d40d8e, type: 2}
   placeType: 1
+  tag: 
+  displayName: Door

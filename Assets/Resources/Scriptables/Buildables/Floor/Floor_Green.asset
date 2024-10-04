@@ -16,3 +16,5 @@ MonoBehaviour:
   uiCategory: {fileID: 11400000, guid: 5a2a2b5103a9b8446bc4cee0ff9c3694, type: 2}
   tileBase: {fileID: 11400000, guid: f46998c3b1706674b9a6e660e56637e5, type: 2}
   placeType: 3
+  tag: 
+  displayName: Grass

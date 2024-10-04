@@ -18,6 +18,7 @@ public class BuildingCreator : Singleton<BuildingCreator>
     [SerializeField] private GameObject categoryItemPrefab; // 동적으로 생성될 셀렉터 UI 중에서 각각의 BuildingObject 아이콘 하나
     [SerializeField] private Tilemap previewTileMap, defaultMap;
     [SerializeField] int buildingObjectUISize = 48;
+    [SerializeField] private Button scriptingTabButton;
 
     private BuildingCreatorInput _playerInput;
     private Vector2 _mousePos;
@@ -40,7 +41,8 @@ public class BuildingCreator : Singleton<BuildingCreator>
     private Dictionary<GameObject, Transform>
         buildingObjectItemSlot =
             new Dictionary<GameObject, Transform>(); // 각각의 BuildingObject와 UI 카테고리 오브젝트 부모 (ui category 아래의 'Items' 오브젝트) 간의 매핑을 저장
-
+    private Dictionary<Tilemap, MapTileInfo> tileInfo = new Dictionary<Tilemap, MapTileInfo>(); // 각 타일맵의 모든 타일 정보를 딕셔너리 안의 딕셔너리로 저장
+    
     private BuildingObjectBase SelectedObj
     {
         set
@@ -79,21 +81,18 @@ public class BuildingCreator : Singleton<BuildingCreator>
 
     private void Update()
     {
-        if (_selectedObj != null)
+        Vector3 pos = _camera.ScreenToWorldPoint(_mousePos);
+        Vector3Int gridPos = previewTileMap.WorldToCell(pos); // 현재 마우스 위치의 WorldPosition -> GridIndex
+
+        if (gridPos != _currentGridPosition) // currentGridPosition 정보 갱신
         {
-            Vector3 pos = _camera.ScreenToWorldPoint(_mousePos);
-            Vector3Int gridPos = previewTileMap.WorldToCell(pos); // 현재 마우스 위치의 WorldPosition -> GridIndex
+            _lastGridPosition = _currentGridPosition;
+            _currentGridPosition = gridPos;
 
-            if (gridPos != _currentGridPosition) // GridPosition 정보 갱신
+            UpdatePreview();
+            if (holdActive && _selectedObj.PlaceType > PlaceType.Single)
             {
-                _lastGridPosition = _currentGridPosition;
-                _currentGridPosition = gridPos;
-
-                UpdatePreview();
-                if (holdActive && _selectedObj.PlaceType > PlaceType.Single)
-                {
-                    HandleDrawing();
-                }
+                HandleDrawing();
             }
         }
     }
@@ -138,7 +137,7 @@ public class BuildingCreator : Singleton<BuildingCreator>
 
     private void OnLeftClick(InputAction.CallbackContext ctx)
     {
-        if (_selectedObj != null && !EventSystem.current.IsPointerOverGameObject())
+        if (_selectedObj is not null && !EventSystem.current.IsPointerOverGameObject())
         {
             if (ctx.phase == InputActionPhase.Started && ctx.interaction is TapInteraction) // 누르기 시작.
                 // 'TapInteraction' 조건이 없으면 SlowTapInteraction.Started에서 값이 갱신되어 마우스를 빠르게 이동시키는 경우 끊기게 되거나 single Placetype의 경우 두 개가 설치된다.
@@ -155,11 +154,21 @@ public class BuildingCreator : Singleton<BuildingCreator>
                 HandleDrawRelease();
             }
         }
+        // 선택한 타일이 없는 채로 타일맵을 클릭하면, 해당 위치의 타일을 선택한다.
+        else if (_selectedObj is null && !EventSystem.current.IsPointerOverGameObject() && ctx.interaction is TapInteraction && ctx.phase is InputActionPhase.Started)
+        {
+            BuildingObjectBase selectedTile = GetTileAtPosition(_currentGridPosition);
+            if (selectedTile is not null)
+            {
+                ScriptingManager.GetInstance().SetTileInfo(selectedTile); // ScriptingTab에 해당 타일의 정보를 표시함
+                scriptingTabButton.onClick.Invoke(); // 자동으로 Scripting Tab으로 전환
+            }
+        }
     }
 
     private void OnRightClick(InputAction.CallbackContext ctx)
     {
-        if (_selectedObj is not null)
+        if (_selectedObj is not null) // 선택 해제
         {
             SelectedObj = null;
         }
@@ -195,10 +204,7 @@ public class BuildingCreator : Singleton<BuildingCreator>
 
     public void SelectObject(BuildingObjectBase obj)
     {
-        // Set preview
         SelectedObj = obj;
-        // on click -> draw
-        // on right click -> cancel draw
     }
 
     private void InitializeMaps() // categoriesToCreateTilemap에 포함된 BuildingCategory마다 각각의 타일맵을 생성
@@ -208,17 +214,26 @@ public class BuildingCreator : Singleton<BuildingCreator>
             GameObject obj = new GameObject("Tilemap_" + category.name);
             Tilemap map = obj.AddComponent<Tilemap>();
             TilemapRenderer tilemapRenderer = obj.AddComponent<TilemapRenderer>();
-
+            
+            TilemapCollider2D tilemapCollider2D = obj.AddComponent<TilemapCollider2D>();
+            Rigidbody2D rigidbody2D = obj.AddComponent<Rigidbody2D>();
+            CompositeCollider2D compositeCollider2D = obj.AddComponent<CompositeCollider2D>();
+            
+            tilemapCollider2D.usedByComposite = true;
+            rigidbody2D.bodyType = RigidbodyType2D.Static;
+            rigidbody2D.simulated = category.SimulatePhysics;
+            
             obj.transform.SetParent(tilemapParent);
 
             tilemapRenderer.sortingOrder = category.SortingOrder;
             category.Tilemap = map;
 
             generatedTilemaps.Add(map);
+            tileInfo[map] = new MapTileInfo();
         }
 
-        generatedTilemaps = FindObjectsOfType<Tilemap>().ToList();
-        // sortingOrder 내림차순으로 정렬
+        // generatedTilemaps = FindObjectsOfType<Tilemap>().ToList();
+        // sortingOrder 내림차순으로 정렬 (가장 위에 표시될 타일맵의 타일부터 탐색할 수 있도록)
         generatedTilemaps.Sort((a, b) =>
         {
             TilemapRenderer aRenderer = a.GetComponent<TilemapRenderer>();
@@ -293,6 +308,12 @@ public class BuildingCreator : Singleton<BuildingCreator>
                         playerStartCellPosition = _currentGridPosition;
                         playerStartPosition = tilemap.GetCellCenterWorld(_currentGridPosition);
                     }
+
+                    if (_selectedObj.GetType() == typeof(BuildingObjectInteractable)) // 버튼 등 상호작용 가능한 물체일 경우 (작업예정)
+                    {
+                        BuildingObjectInteractable selectedInteractable = (BuildingObjectInteractable)_selectedObj;
+                        Debug.Log(selectedInteractable.EventIndex);
+                    }
                     DrawItem(tilemap);
                     break;
                 case PlaceType.Line:
@@ -361,7 +382,13 @@ public class BuildingCreator : Singleton<BuildingCreator>
         {
             for (int y = bounds.yMin; y <= bounds.yMax; y++)
             {
-                targetMap.SetTile(new Vector3Int(x, y, 0), _selectedObj.TileBase);
+                Vector3Int position = new Vector3Int(x, y, 0);
+                targetMap.SetTile(position, _selectedObj.TileBase);
+                
+                if (targetMap != previewTileMap)
+                {
+                    tileInfo[targetMap].SetTileAtPosition(position, _selectedObj);
+                }
             }
         }
 
@@ -383,5 +410,40 @@ public class BuildingCreator : Singleton<BuildingCreator>
         BuildingHistoryManager bh = BuildingHistoryManager.GetInstance();
         bh.AddItem(item);
         bh.ClearRedoStack();
+        
+        tileInfo[targetMap].SetTileAtPosition(_currentGridPosition, _selectedObj);
+    }
+
+    private BuildingObjectBase GetTileAtPosition(Vector3Int gridPosition)
+    {
+        foreach (Tilemap map in generatedTilemaps)
+        {
+            if (tileInfo[map].GetTileAtPosition(gridPosition) is not null)
+            {
+                BuildingObjectBase tile = tileInfo[map].GetTileAtPosition(gridPosition);
+                if (tile is not null)
+                {
+                    return tile;
+                }
+            }
+        }
+        return null;
+    }
+}
+
+public class MapTileInfo // 각 타일맵의 모든 타일 정보를 기록하고 있는 딕셔너리 클래스
+{
+    private Dictionary<Vector3Int, BuildingObjectBase> tileInfo = new Dictionary<Vector3Int, BuildingObjectBase>();
+
+    public BuildingObjectBase GetTileAtPosition(Vector3Int gridPosition)
+    {
+        BuildingObjectBase objectBase;
+        tileInfo.TryGetValue(gridPosition, out objectBase);
+        return objectBase;
+    }
+
+    public void SetTileAtPosition(Vector3Int gridPosition, BuildingObjectBase targetTile)
+    {
+        tileInfo[gridPosition] = targetTile;
     }
 }

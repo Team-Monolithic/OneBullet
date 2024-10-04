@@ -9,12 +9,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6a58fddfceb360943b923c1647a2ad8c, type: 3}
-  m_Name: PlayerStart
+  m_Script: {fileID: 11500000, guid: 6d4fc643fbd95a943b6315a2ef1055b0, type: 3}
+  m_Name: TestButton
   m_EditorClassIdentifier: 
   buildingCategory: {fileID: 11400000, guid: 53b2dee132f47e14aa459ca9a4008b34, type: 2}
   uiCategory: {fileID: 11400000, guid: e3350be75b16d4e468f5d7edd5f4e70a, type: 2}
-  tileBase: {fileID: 11400000, guid: afcb27e3c2347ce4da285fe44bafc1f0, type: 2}
+  tileBase: {fileID: 11400000, guid: 558e85573d8765e4798e7bf70d4df706, type: 2}
   placeType: 1
-  tag: PlayerStart
-  displayName: PlayerStart
+  tag: 
+  displayName: Test Button
+  eventIndex: 1

@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8d42b4cdb123994e935e9e11bc9b4b6, type: 3}
   m_Name: Structure
   m_EditorClassIdentifier: 
-  placeType: 2
   sortingOrder: 0
+  simulatePhysics: 1

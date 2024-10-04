@@ -16,3 +16,5 @@ MonoBehaviour:
   uiCategory: {fileID: 11400000, guid: f4d3db3ae08ee2443bfb160e50639148, type: 2}
   tileBase: {fileID: 11400000, guid: f522c537d12a6514e82275ba614ae7ab, type: 2}
   placeType: 2
+  tag: 
+  displayName: Wall
