@@ -12,6 +12,11 @@ public enum PlaceType
     Rectangle
 }
 
+public enum EventType
+{
+    Started
+}
+
 [CreateAssetMenu (fileName = "Buildable", menuName = "BuildingObjects/Create Buildable")]
 public class BuildingObjectBase : ScriptableObject
 {
