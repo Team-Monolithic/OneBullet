@@ -158,10 +158,17 @@ public class BuildingCreator : Singleton<BuildingCreator>
         else if (_selectedObj is null && !EventSystem.current.IsPointerOverGameObject() && ctx.interaction is TapInteraction && ctx.phase is InputActionPhase.Started)
         {
             BuildingObjectBase selectedTile = GetTileAtPosition(_currentGridPosition);
+            ScriptingManager.GetInstance().ToggleSelectedTileMode(selectedTile is not null);
             if (selectedTile is not null)
             {
                 ScriptingManager.GetInstance().SetTileInfo(selectedTile); // ScriptingTab에 해당 타일의 정보를 표시함
+                ScriptingManager.GetInstance().SetTileEvents(selectedTile);
                 scriptingTabButton.onClick.Invoke(); // 자동으로 Scripting Tab으로 전환
+                ScriptingManager.GetInstance().SelectedTile = selectedTile;
+            }
+            else
+            {
+                ScriptingManager.GetInstance().SelectedTile = null;
             }
         }
     }

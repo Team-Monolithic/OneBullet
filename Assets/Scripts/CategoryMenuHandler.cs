@@ -26,6 +26,5 @@ public class CategoryMenuHandler : MonoBehaviour
             expand.SetActive(true);
             items.SetActive(false);
         }
-        EventHandler.GetInstance().RebuildLayout();
     }
 }
