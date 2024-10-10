@@ -12,11 +12,6 @@ public enum PlaceType
     Rectangle
 }
 
-public enum EventType
-{
-    Started
-}
-
 [CreateAssetMenu (fileName = "Buildable", menuName = "BuildingObjects/Create Buildable")]
 public class BuildingObjectBase : ScriptableObject
 {
@@ -26,6 +21,8 @@ public class BuildingObjectBase : ScriptableObject
     [SerializeField] private PlaceType placeType; // 설치 타입
     [SerializeField] private string displayName; // 화면에 보일 이름
     [SerializeField] public string tag;
+    public List<Event> events = new List<Event>();
+    public List<ActionSO> interactionActions = new List<ActionSO>();
     
     // Public Getter
     public BuildingCategory BuildingCategory => buildingCategory;

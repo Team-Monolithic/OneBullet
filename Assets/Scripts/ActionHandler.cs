@@ -2,8 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
-public class EventCategory : MonoBehaviour
+public class ActionHandler : MonoBehaviour
 {
+    public ActionSO _actionSO;
 }

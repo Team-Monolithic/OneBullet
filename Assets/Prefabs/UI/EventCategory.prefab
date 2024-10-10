@@ -52,7 +52,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1421198615972670667, guid: ade9b3f0fdd0944449ccbb1cfa3b8de2, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 150
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 1421198615972670667, guid: ade9b3f0fdd0944449ccbb1cfa3b8de2, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -60,7 +60,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1421198615972670667, guid: ade9b3f0fdd0944449ccbb1cfa3b8de2, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -115.22
+      value: -45.22
       objectReference: {fileID: 0}
     - target: {fileID: 2938899289537092611, guid: ade9b3f0fdd0944449ccbb1cfa3b8de2, type: 3}
       propertyPath: m_AnchorMax.y
@@ -88,7 +88,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3214831384954238129, guid: ade9b3f0fdd0944449ccbb1cfa3b8de2, type: 3}
       propertyPath: m_Name
-      value: CollapsibleCategoryVertical
+      value: EventCategory
       objectReference: {fileID: 0}
     - target: {fileID: 3214831384954238129, guid: ade9b3f0fdd0944449ccbb1cfa3b8de2, type: 3}
       propertyPath: m_IsActive
@@ -201,6 +201,30 @@ PrefabInstance:
     - target: {fileID: 6795918212930870423, guid: ade9b3f0fdd0944449ccbb1cfa3b8de2, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7119211338489125119, guid: ade9b3f0fdd0944449ccbb1cfa3b8de2, type: 3}
+      propertyPath: m_Color.b
+      value: 0.19496846
+      objectReference: {fileID: 0}
+    - target: {fileID: 7119211338489125119, guid: ade9b3f0fdd0944449ccbb1cfa3b8de2, type: 3}
+      propertyPath: m_Color.g
+      value: 0.19496846
+      objectReference: {fileID: 0}
+    - target: {fileID: 7119211338489125119, guid: ade9b3f0fdd0944449ccbb1cfa3b8de2, type: 3}
+      propertyPath: m_Color.r
+      value: 0.19496846
+      objectReference: {fileID: 0}
+    - target: {fileID: 8190010689977640300, guid: ade9b3f0fdd0944449ccbb1cfa3b8de2, type: 3}
+      propertyPath: m_Color.b
+      value: 0.6188588
+      objectReference: {fileID: 0}
+    - target: {fileID: 8190010689977640300, guid: ade9b3f0fdd0944449ccbb1cfa3b8de2, type: 3}
+      propertyPath: m_Color.g
+      value: 0.88235295
+      objectReference: {fileID: 0}
+    - target: {fileID: 8190010689977640300, guid: ade9b3f0fdd0944449ccbb1cfa3b8de2, type: 3}
+      propertyPath: m_Color.r
+      value: 0.6
       objectReference: {fileID: 0}
     - target: {fileID: 8526413227050322057, guid: ade9b3f0fdd0944449ccbb1cfa3b8de2, type: 3}
       propertyPath: m_IsActive
