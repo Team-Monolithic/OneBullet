@@ -59,6 +59,18 @@ public class ConditionFactory
     // 외부(UI)에서 선택한 객체, 속성, 비교 연산자, 값으로 Condition 생성
     public Condition CreateCondition(string objectName, string propertyName, ComparisonOperator comparison, object targetValue, ConditionType conditionType)
     {
+        var trackedProperty = GetTrackedProperty(objectName, propertyName);
+        if (trackedProperty == null) return null;
+
+        var conditionCheck = CreateConditionCheck(comparison, targetValue);
+        var conditionMetCallback = GetConditionCallback(conditionType);
+
+        return new Condition(() => trackedProperty, conditionCheck, conditionMetCallback);
+    }
+
+    // 객체와 속성을 조회하여 트랙 가능한 속성을 반환하는 함수
+    private ITrackedProperty GetTrackedProperty(string objectName, string propertyName)
+    {
         if (!_propertyCache.TryGetValue(objectName, out var properties))
         {
             Debug.LogError($"Object '{objectName}' not found in property cache.");
@@ -71,7 +83,13 @@ public class ConditionFactory
             return null;
         }
 
-        Func<object, bool> conditionCheck = value =>
+        return trackedProperty;
+    }
+
+    // 비교 연산자와 목표 값에 따라 조건 평가 함수를 생성하는 함수
+    private Func<object, bool> CreateConditionCheck(ComparisonOperator comparison, object targetValue)
+    {
+        return value =>
         {
             switch (comparison)
             {
@@ -87,12 +105,11 @@ public class ConditionFactory
                     throw new ArgumentOutOfRangeException();
             }
         };
+    }
 
-        Func<ITrackedProperty> propertyGetter = () => trackedProperty;
-
-        // 조건 타입에 맞는 콜백 지정
-        Action conditionMetCallback = conditionType == ConditionType.GameWin ? _onGameWinConditionMet : _onGameLoseConditionMet;
-
-        return new Condition(propertyGetter, conditionCheck, conditionMetCallback);
+    // 조건 타입에 따라 적절한 콜백을 반환하는 함수
+    private Action GetConditionCallback(ConditionType conditionType)
+    {
+        return conditionType == ConditionType.GameWin ? _onGameWinConditionMet : _onGameLoseConditionMet;
     }
 }

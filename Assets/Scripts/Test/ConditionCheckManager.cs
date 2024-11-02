@@ -15,6 +15,7 @@ public class ConditionCheckManager : MonoBehaviour
 
     public void Initialize()
     {
+        _conditionFactory = new ConditionFactory(OnGameWinConditionMet, OnGameLoseConditionMet);
         RegisterSceneObjects();
         InitializeConditions();
         StartCoroutine(nameof(__TEST__SetTimerForTest));
@@ -32,15 +33,15 @@ public class ConditionCheckManager : MonoBehaviour
 
     private void InitializeConditions()
     {
+
         _conditionTreeList = new List<ConditionTree>
         {
-            new ConditionTree(ConditionEvaluationMode.Sequential),   // Lose Condition Tree
-            new ConditionTree(ConditionEvaluationMode.NonSequential) // Win Condition Tree
+            new ConditionTree(ConditionEvaluationMode.NonSequential),   // Win Condition Tree
+            new ConditionTree(ConditionEvaluationMode.Sequential) // Lose Condition Tree
         };
 
         CreateConditionsForTest();
 
-        _conditionFactory = new ConditionFactory(OnGameWinConditionMet, OnGameLoseConditionMet);
 
     }
 
