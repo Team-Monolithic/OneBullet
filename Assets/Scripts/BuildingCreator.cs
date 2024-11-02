@@ -100,6 +100,7 @@ public class BuildingCreator : Singleton<BuildingCreator>
     private void OnEnable()
     {
         _playerInput.Enable();
+
         _playerInput.Gameplay.MousePosition.performed += OnMouseMove;
         _playerInput.Gameplay.MouseLeftClick.performed += OnLeftClick;
         _playerInput.Gameplay.MouseLeftClick.started += OnLeftClick;

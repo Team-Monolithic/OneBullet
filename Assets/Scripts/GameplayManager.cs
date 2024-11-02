@@ -24,7 +24,8 @@ public class GameplayManager : Singleton<GameplayManager>
     private bool gameInitialized = false;
     private Color normalColor = new Color(1f, 1f, 1f);
     private Color pressedColor = new Color(0.55f, 0.55f, 0.55f);
-    
+    public ConditionCheckManager conditionCheckManager;
+
     private void Start()
     {
         playButton.onClick.AddListener(StartButtonClicked);
@@ -39,10 +40,11 @@ public class GameplayManager : Singleton<GameplayManager>
             Debug.LogError("No PlayerStart");
             return;
         }
-            
+
         // Spawn
-        Instantiate(playerCharacter, creator.playerStartPosition, Quaternion.identity);
-        
+        var playerObj = Instantiate(playerCharacter, creator.playerStartPosition, Quaternion.identity).GetComponent<PlayerController>();
+        playerObj.name = playerCharacter.name;
+        conditionCheckManager.Initialize();
         // TODO : 모든 오브젝트 정위치
 
         gameInitialized = true;
