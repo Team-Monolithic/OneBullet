@@ -25,7 +25,7 @@ public class ConditionTree
         _nodes.Add(node);
     }
 
-    public bool Evaluate()
+    public ConditionType? Evaluate()
     {
         switch (_evaluationMode)
         {
@@ -34,15 +34,15 @@ public class ConditionTree
             case ConditionEvaluationMode.NonSequential:
                 return EvaluateNonSequentially();
             default:
-                return false;
+                return null;
         }
     }
 
     // 순차적 평가
-    private bool EvaluateSequentially()
+    private ConditionType? EvaluateSequentially()
     {
         if (_currentConditionIndex >= _nodes.Count)
-            return true;
+            return null;
 
         var currentNode = _nodes[_currentConditionIndex];
         if (currentNode.Evaluate())
@@ -50,33 +50,44 @@ public class ConditionTree
             _currentConditionIndex++;
             if (_currentConditionIndex >= _nodes.Count)
             {
-                Debug.Log("Victory condition met in the correct order!");
-                return true;
+                return currentNode.GetConditionType();
             }
         }
         else
         {
-            Debug.Log("Failure: Conditions met in the wrong order.");
-            Reset();
+            Reset(); // 순서가 맞지 않을 경우 초기화
         }
 
-        return false;
+        return null;
     }
 
     // 비순차적 평가
-    private bool EvaluateNonSequentially()
+    private ConditionType? EvaluateNonSequentially()
     {
+        bool winConditionMet = false;
+        bool loseConditionMet = false;
+
         foreach (var node in _nodes)
         {
-            if (!node.Evaluate())
+            if (node.Evaluate())
             {
-                return false;
+                if (node.GetConditionType() == ConditionType.GameWin)
+                {
+                    winConditionMet = true;
+                }
+                else if (node.GetConditionType() == ConditionType.GameLose)
+                {
+                    loseConditionMet = true;
+                }
             }
         }
 
-        Debug.Log("ConditionTree::EvaluateNonSequentially()::Victory condition met!");
-        return true;
+        if (winConditionMet && !loseConditionMet) return ConditionType.GameWin;
+        if (loseConditionMet && !winConditionMet) return ConditionType.GameLose;
+
+        return null;
     }
+
 
     public void Reset()
     {
@@ -95,4 +106,5 @@ public class ConditionTree
             node.UnsubscribeCondition();
         }
     }
+
 }

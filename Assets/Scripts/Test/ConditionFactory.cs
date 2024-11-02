@@ -24,16 +24,19 @@ public enum ConditionType
 public class ConditionFactory
 {
     private readonly Dictionary<string, ITrackableObject> _objectRegistry;
-    private readonly Action _onConditionMetCallback; //단일 조건 만족 시 전체 트리 검사 콜백 
     private readonly Dictionary<string, Dictionary<string, ITrackedProperty>> _propertyCache; // 캐시 추가
+    private readonly Action _onGameWinConditionMet;
+    private readonly Action _onGameLoseConditionMet;
 
     //생성자
-    public ConditionFactory(Action onConditionMetCallback)
+    public ConditionFactory(Action onGameWinConditionMet, Action onGameLoseConditionMet)
     {
         _objectRegistry = new Dictionary<string, ITrackableObject>();
-        _propertyCache = new Dictionary<string, Dictionary<string, ITrackedProperty>>(); // 캐시 초기화
-        _onConditionMetCallback = onConditionMetCallback;
+        _propertyCache = new Dictionary<string, Dictionary<string, ITrackedProperty>>();
+        _onGameWinConditionMet = onGameWinConditionMet;
+        _onGameLoseConditionMet = onGameLoseConditionMet;
     }
+
 
     public void RegisterObject(string objectName, ITrackableObject obj)
     {
@@ -41,7 +44,7 @@ public class ConditionFactory
         _propertyCache[objectName] = obj.GetProperties();
     }
 
-    // 등록된 객체를 안전하게 가져오는 메서드
+    // 등록된 객체를 가져오는 메서드
     public T GetRegisteredObject<T>(string objectName) where T : class, ITrackableObject
     {
         if (_objectRegistry.TryGetValue(objectName, out var obj))
@@ -56,17 +59,18 @@ public class ConditionFactory
     // 외부(UI)에서 선택한 객체, 속성, 비교 연산자, 값으로 Condition 생성
     public Condition CreateCondition(string objectName, string propertyName, ComparisonOperator comparison, object targetValue, ConditionType conditionType)
     {
-        if (!_propertyCache.TryGetValue(objectName, out var properties)) // 캐시에서 속성 가져오기
+        if (!_propertyCache.TryGetValue(objectName, out var properties))
         {
             Debug.LogError($"Object '{objectName}' not found in property cache.");
             return null;
         }
+
         if (!properties.TryGetValue(propertyName, out var trackedProperty))
         {
             Debug.LogError($"Property '{propertyName}' not found on object '{objectName}'.");
             return null;
         }
-        //조건 체크
+
         Func<object, bool> conditionCheck = value =>
         {
             switch (comparison)
@@ -85,8 +89,10 @@ public class ConditionFactory
         };
 
         Func<ITrackedProperty> propertyGetter = () => trackedProperty;
-        
-        //완성된 조건 문 반환
-        return new Condition(propertyGetter, conditionCheck, _onConditionMetCallback);
+
+        // 조건 타입에 맞는 콜백 지정
+        Action conditionMetCallback = conditionType == ConditionType.GameWin ? _onGameWinConditionMet : _onGameLoseConditionMet;
+
+        return new Condition(propertyGetter, conditionCheck, conditionMetCallback);
     }
 }
