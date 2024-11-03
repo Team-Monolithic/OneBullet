@@ -10,6 +10,7 @@ public class EventItem : MonoBehaviour
     [SerializeField] private GameObject actionAddButton;
     [SerializeField] private GameObject actionCategory;
     [SerializeField] private GameObject actionPrefab;
+    
     [SerializeField] private Transform actionListParent;
     [SerializeField] public TextMeshProUGUI eventTitleText;
     
@@ -19,12 +20,11 @@ public class EventItem : MonoBehaviour
         get => targetEvent;
         set => targetEvent = value;
     }
-
-    // TODO : ActionItem script 만들어서 targetAction 붙이고 실제 액션과 연결
     
     public void AddActionCategory()
     {
         GameObject inst = Instantiate(ScriptingManager.GetInstance().actionCategoryTemp);
+        inst.SetActive(true);
         inst.transform.SetParent(actionCategory.transform);
         inst.GetComponent<RectTransform>().localScale = new Vector3(1, 1, 1);
         foreach (Transform child in inst.transform)
@@ -39,6 +39,21 @@ public class EventItem : MonoBehaviour
         }
     }
 
+    public void MakeActionUI(Event tileEvent)
+    {
+        if (tileEvent.Actions.Count > 0)
+        {
+            foreach (Action action in tileEvent.Actions)
+            {
+                GameObject inst = Instantiate(actionPrefab);
+                inst.transform.SetParent(actionListParent);
+                inst.GetComponentInChildren<TextMeshProUGUI>().text = action.actionSO.ActionDisplayName;
+                inst.GetComponent<RectTransform>().localScale = new Vector3(1, 1, 1);
+                inst.GetComponent<ActionItem>().MakePropertyUI(action);
+            }
+        }
+    }
+
     public void ActionAddButtonClicked()
     {
         actionAddButton.gameObject.SetActive(false);
@@ -48,14 +63,14 @@ public class EventItem : MonoBehaviour
     public void ActionCategoryButtonClicked(ActionSO actionSO)
     {
         Action newAction = new Action();
-        newAction.actionType = actionSO.SOActionType;
-        
-        // 해당 event에 action 추가
+        newAction.actionSO = actionSO;
         targetEvent.AddAction(newAction);
         
         GameObject inst = Instantiate(actionPrefab);
         inst.transform.SetParent(actionListParent, false);
         inst.GetComponentInChildren<TextMeshProUGUI>().text = actionSO.ActionDisplayName;
+        inst.GetComponent<ActionItem>().AddProperties(actionSO);
+        
         actionAddButton.gameObject.SetActive(true);
         actionCategory.SetActive(false);
         actionCategory.GetComponentInChildren<CategoryMenuHandler>().ToggleExpandMode();

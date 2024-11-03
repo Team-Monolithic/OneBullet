@@ -15,3 +15,6 @@ MonoBehaviour:
   actionCategory: {fileID: 11400000, guid: 775640e853594984d82f1767147db16e, type: 2}
   actionType: 0
   actionDisplayName: Trigger Fire
+  properties:
+  - name: triggerNo
+    type: 1

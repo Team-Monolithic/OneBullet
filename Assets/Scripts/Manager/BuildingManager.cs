@@ -291,7 +291,7 @@ public class BuildingManager : Singleton<BuildingManager>
             img.GetComponent<RectTransform>().localScale = new Vector3(1, 1, 1);
 
             // 실제 배치될 BuildingObject를 셀렉터UI 상의 아이템과 연결
-            var script = inst.GetComponent<BuildingButtonHandler>();
+            var script = inst.GetComponent<TileUIHandler>();
             script.Item = buildingObject;
         }
     }

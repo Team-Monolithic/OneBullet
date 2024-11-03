@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class BuildingButtonHandler : MonoBehaviour
+public class TileUIHandler : MonoBehaviour
 {
     [SerializeField] private BuildingObjectBase item;
     private Button _button;

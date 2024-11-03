@@ -15,3 +15,8 @@ MonoBehaviour:
   actionCategory: {fileID: 11400000, guid: 4812c45e015254d4e9742eb4575723a4, type: 2}
   actionType: 1
   actionDisplayName: Move To
+  properties:
+  - name: speed
+    type: 0
+  - name: position
+    type: 1

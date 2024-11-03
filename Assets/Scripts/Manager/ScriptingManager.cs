@@ -76,20 +76,9 @@ public class ScriptingManager : Singleton<ScriptingManager>
         eventGameObject.GetComponent<EventItem>().TargetEvent = tileEvent;
         eventGameObject.GetComponent<EventItem>().eventTitleText.text = tileEvent.EventType.ToString();
         eventGameObject.GetComponent<RectTransform>().localScale = new Vector3(1, 1, 1);
-        
         eventGameObject.GetComponent<EventItem>().AddActionCategory();
-
-        if (tileEvent.Actions.Count > 0)
-        {
-            foreach (Action act in tileEvent.Actions)
-            {
-                GameObject actionGameObject = Instantiate(actionUIPrefab);
-                actionGameObject.transform.SetParent(eventGameObject.transform.Find("ActionList"));
-                actionGameObject.name = act.actionType.ToString();
-                actionGameObject.GetComponentInChildren<TextMeshProUGUI>().text = act.actionType.ToString();
-                actionGameObject.GetComponent<RectTransform>().localScale = new Vector3(1, 1, 1);
-            }
-        }
+        
+        eventGameObject.GetComponent<EventItem>().MakeActionUI(tileEvent);
     }
 
     private void Start()
@@ -201,13 +190,8 @@ public class ScriptingManager : Singleton<ScriptingManager>
 public class Action
 {
     private BuildingObjectBase _ownerTile;
-    public ActionType actionType;
-    public string actionName;
-    public List<Property<float>> floatProperties;
-    public List<Property<int>> intProperties;
-    public List<Property<GameObject>> gameObjectProperties;
-    public List<Property<BuildingObjectBase>> buildingObjectProperties;
-    
+    public ActionSO actionSO;
+    // public List<Property> properties; -> 실제 값을 저장할 수 있는 리스트 필요
 }
 
 public class Property<T>
