@@ -109,7 +109,6 @@ GameObject:
   - component: {fileID: 4205654713817341538}
   - component: {fileID: 2523682827270982433}
   - component: {fileID: 6653010877657997122}
-  - component: {fileID: 7923384237991950816}
   - component: {fileID: 8190010689977640300}
   m_Layer: 5
   m_Name: Header
@@ -237,22 +236,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 8190010689977640300}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
---- !u!114 &7923384237991950816
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2189014554950234515}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 57e509f206d253746bd0a05e6642db9d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  shrink: {fileID: 1506563129156696619}
-  expand: {fileID: 3009489049768880721}
-  items: {fileID: 8526413227050322057}
+      m_Calls:
+      - m_Target: {fileID: 4134733474080326629}
+        m_TargetAssemblyTypeName: CategoryMenuHandler, Assembly-CSharp
+        m_MethodName: ToggleExpandMode
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &8190010689977640300
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -390,6 +386,7 @@ GameObject:
   - component: {fileID: 6795918212930870423}
   - component: {fileID: 8863108806348880301}
   - component: {fileID: 683777609333427968}
+  - component: {fileID: 4134733474080326629}
   m_Layer: 5
   m_Name: CollapsibleCategory
   m_TagString: Untagged
@@ -458,6 +455,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_HorizontalFit: 0
   m_VerticalFit: 2
+--- !u!114 &4134733474080326629
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3214831384954238129}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57e509f206d253746bd0a05e6642db9d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  shrink: {fileID: 1506563129156696619}
+  expand: {fileID: 3009489049768880721}
+  items: {fileID: 8526413227050322057}
 --- !u!1 &4282751359769354847
 GameObject:
   m_ObjectHideFlags: 0
@@ -634,7 +646,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1421198615972670667
 RectTransform:
   m_ObjectHideFlags: 0
@@ -649,10 +661,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 6795918212930870423}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 191.5, y: -45.22}
+  m_SizeDelta: {x: 383, y: 10}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &7878006557216477850
 MonoBehaviour:

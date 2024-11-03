@@ -33,15 +33,15 @@ public class GameplayManager : Singleton<GameplayManager>
 
     private void InitGame()
     {
-        BuildingCreator creator = BuildingCreator.GetInstance();
-        if (creator.playerStartPosition == Vector3Int.back)
+        BuildingManager buildingManager = BuildingManager.GetInstance();
+        if (buildingManager.playerStartPosition == Vector3Int.back)
         {
             Debug.LogError("No PlayerStart");
             return;
         }
             
         // Spawn
-        Instantiate(playerCharacter, creator.playerStartPosition, Quaternion.identity);
+        Instantiate(playerCharacter, buildingManager.playerStartPosition, Quaternion.identity);
         
         // TODO : 모든 오브젝트 정위치
 

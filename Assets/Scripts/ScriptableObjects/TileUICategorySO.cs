@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-[CreateAssetMenu(fileName = "UICategory", menuName = "LevelBuilding/Create UI Category")]
-public class UICategory : ScriptableObject
+[CreateAssetMenu(fileName = "TileCategorySO", menuName = "LevelBuilding/Create Tile Category")]
+public class TileUICategorySO : ScriptableObject
 {
     [SerializeField] private int siblingIndex = 0;
     [SerializeField] private Color backgroundColor;

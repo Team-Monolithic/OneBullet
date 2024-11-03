@@ -4,8 +4,8 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 
 
-[CreateAssetMenu(fileName = "Category", menuName = "LevelBuilding/Create Category")]
-public class BuildingCategory : ScriptableObject
+[CreateAssetMenu(fileName = "TilemapSO", menuName = "LevelBuilding/Create TilemapSO")]
+public class TilemapSO : ScriptableObject
 {
     // [SerializeField] private PlaceType placeType; // 설치 타입
     [SerializeField] private int sortingOrder = 0; // 타일맵끼리의 z-index를 설정
