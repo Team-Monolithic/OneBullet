@@ -69,16 +69,16 @@ public class ScriptingManager : Singleton<ScriptingManager>
         }
     }
 
-    public void MakeEventUI(Event tileEvent)
+    // 타일이 가진 각각의 이벤트를 UI로 뿌린다. 이벤트 프리팹을 이용해 Instantiate하고 이후 makeActionUI()로 액션들을 추가한다.
+    public void MakeEventUI(Event tileEvent) 
     {
         GameObject eventGameObject = Instantiate(eventUIPrefab);
         eventGameObject.transform.SetParent(eventsParent);
         eventGameObject.GetComponent<EventItem>().TargetEvent = tileEvent;
-        eventGameObject.GetComponent<EventItem>().eventTitleText.text = tileEvent.EventType.ToString();
+        eventGameObject.GetComponent<EventItem>().eventTitleText.text = tileEvent.eventType.ToString();
         eventGameObject.GetComponent<RectTransform>().localScale = new Vector3(1, 1, 1);
         eventGameObject.GetComponent<EventItem>().AddActionCategory();
-        
-        eventGameObject.GetComponent<EventItem>().MakeActionUI(tileEvent);
+        eventGameObject.GetComponent<EventItem>().MakeActionUI(tileEvent); // 이 이벤트가 가진 액션들을 생성. event->actions 참조함
     }
 
     private void Start()
@@ -140,7 +140,7 @@ public class ScriptingManager : Singleton<ScriptingManager>
             });
         }
     }
-
+    // Action Category를 미리 만들어 두고 재사용
     private void BuildActionCategories()
     {
         ActionCategorySO[] categories = Resources.LoadAll<ActionCategorySO>("Scriptables/ActionCategories");
@@ -176,44 +176,38 @@ public class ScriptingManager : Singleton<ScriptingManager>
         eventAddButton.gameObject.SetActive(false);
     }
     
-    public void EventCategoryButtonClicked(EventType eventType)
+    public void EventCategoryButtonClicked(EventType eventType) // 새로운 이벤트를 생성
     {
         eventCategoryParent.gameObject.SetActive(false);
         eventAddButton.gameObject.SetActive(true);
 
-        Event eventItem = new Event(eventType);
-        selectedTile.events.Add(eventItem);
-        MakeEventUI(eventItem);
+        Event newEvent = new Event(eventType);
+        selectedTile.events.Add(newEvent);
+        newEvent.ownerTile = selectedTile; // 현재 선택된 tile을 ownerTile로 설정 -> 이후 프로퍼티 설정 시에 참조할 수 있도록 함
+        MakeEventUI(newEvent);
+    }
+}
+public class Event
+{
+    public EventType eventType;
+    public List<Action> actions = new List<Action>();
+    public BuildingObjectBase ownerTile; // 어떤 타일에 부착된 event인지
+    
+    public Event(EventType type)
+    {
+        eventType = type;
+    }
+
+    public void AddAction(Action inAction)
+    {
+        actions.Add(inAction);
     }
 }
 
 public class Action
 {
-    private BuildingObjectBase _ownerTile;
     public ActionSO actionSO;
-    // public List<Property> properties; -> 실제 값을 저장할 수 있는 리스트 필요
-}
+    public Event ownerEvent;
+    public Dictionary<string, ActionProperty> properties = new Dictionary<string, ActionProperty>();
 
-public class Property<T>
-{
-    public string propertyName;
-    public T value;
-}
-
-public class Event
-{
-    private EventType _eventType;
-    private List<Action> _actions = new List<Action>();
-
-    public EventType EventType => _eventType;
-    public List<Action> Actions => _actions;
-    public Event(EventType type)
-    {
-        _eventType = type;
-    }
-
-    public void AddAction(Action inAction)
-    {
-        _actions.Add(inAction);
-    }
 }

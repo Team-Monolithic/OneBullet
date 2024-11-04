@@ -21,13 +21,6 @@ public class ActionSO : ScriptableObject
 
     public ActionType SOActionType => actionType;
     public string ActionDisplayName => actionDisplayName;
-
-    public void AddProperty(string name, ActionProperty.PropertyType type)
-    {
-        ActionProperty newProperty = new ActionProperty { name = name, type = type };
-        System.Array.Resize(ref properties, properties.Length + 1);
-        properties[properties.Length - 1] = newProperty;
-    }
 }
 
 [System.Serializable]
@@ -41,11 +34,6 @@ public class ActionProperty
     {
         Float,
         Int,
-        Vector3
-    }
-
-    public object GetValue()
-    {
-        return value;
+        Vector2
     }
 }

@@ -34,22 +34,24 @@ public class EventItem : MonoBehaviour
             {
                 btn.onClick.AddListener(() =>
                 {
-                    ActionCategoryButtonClicked(btn.gameObject.GetComponent<ActionHandler>()._actionSO);                });
+                    ActionCategoryButtonClicked(btn.gameObject.GetComponent<ActionHandler>()._actionSO);                
+                });
             }
         }
     }
 
-    public void MakeActionUI(Event tileEvent)
+    public void MakeActionUI(Event tileEvent) // 특정 이벤트의 액션들을 ui 출력
     {
-        if (tileEvent.Actions.Count > 0)
+        if (tileEvent.actions.Count > 0)
         {
-            foreach (Action action in tileEvent.Actions)
+            foreach (Action action in tileEvent.actions)
             {
                 GameObject inst = Instantiate(actionPrefab);
                 inst.transform.SetParent(actionListParent);
                 inst.GetComponentInChildren<TextMeshProUGUI>().text = action.actionSO.ActionDisplayName;
                 inst.GetComponent<RectTransform>().localScale = new Vector3(1, 1, 1);
                 inst.GetComponent<ActionItem>().MakePropertyUI(action);
+                inst.GetComponent<ActionItem>().TargetAction = action;
             }
         }
     }
@@ -60,15 +62,21 @@ public class EventItem : MonoBehaviour
         actionCategory.gameObject.SetActive(true);
     }
 
-    public void ActionCategoryButtonClicked(ActionSO actionSO)
+    public void ActionCategoryButtonClicked(ActionSO actionSO) // 새로운 액션 생성
     {
         Action newAction = new Action();
         newAction.actionSO = actionSO;
         targetEvent.AddAction(newAction);
+
+        foreach (ActionProperty property in actionSO.properties)
+        {
+            newAction.properties[property.name] = property;
+        }
         
         GameObject inst = Instantiate(actionPrefab);
         inst.transform.SetParent(actionListParent, false);
         inst.GetComponentInChildren<TextMeshProUGUI>().text = actionSO.ActionDisplayName;
+        inst.GetComponent<ActionItem>().TargetAction = newAction;
         inst.GetComponent<ActionItem>().AddProperties(actionSO);
         
         actionAddButton.gameObject.SetActive(true);
