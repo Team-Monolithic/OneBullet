@@ -1,12 +1,12 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class BuildingButtonHandler : MonoBehaviour
+public class TileUIHandler : MonoBehaviour
 {
     [SerializeField] private BuildingObjectBase item;
     private Button _button;
 
-    private BuildingCreator buildingCreator;
+    private BuildingManager buildingManager;
 
     public BuildingObjectBase Item
     {
@@ -18,11 +18,11 @@ public class BuildingButtonHandler : MonoBehaviour
     {
         _button = GetComponent<Button>();
         _button.onClick.AddListener(ButtonClicked);
-        buildingCreator = BuildingCreator.GetInstance();
+        buildingManager = BuildingManager.GetInstance();
     }
 
     private void ButtonClicked()
     {
-        buildingCreator.SelectObject(item);
+        buildingManager.SelectObject(item);
     }
 }

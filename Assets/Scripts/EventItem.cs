@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,24 +10,69 @@ public class EventItem : MonoBehaviour
     [SerializeField] private GameObject actionAddButton;
     [SerializeField] private GameObject actionCategory;
     [SerializeField] private GameObject actionPrefab;
-    [SerializeField] private Transform actionListParent;
     
-    public void ActionAddButtonClicked()
+    [SerializeField] private Transform actionListParent;
+    [SerializeField] public TextMeshProUGUI eventTitleText;
+    
+    private Event targetEvent;
+    public Event TargetEvent
     {
-        actionCategory.SetActive(true);
-        actionAddButton.gameObject.SetActive(false);
-        EventHandler.GetInstance().RebuildLayout();
+        get => targetEvent;
+        set => targetEvent = value;
+    }
+    
+    public void AddActionCategory()
+    {
+        GameObject inst = Instantiate(ScriptingManager.GetInstance().actionCategoryTemp);
+        inst.SetActive(true);
+        inst.transform.SetParent(actionCategory.transform);
+        inst.GetComponent<RectTransform>().localScale = new Vector3(1, 1, 1);
+        foreach (Transform child in inst.transform)
+        {
+            GameObject items = child.transform.Find("Items").gameObject;
+            foreach (Button btn in items.GetComponentsInChildren<Button>())
+            {
+                btn.onClick.AddListener(() =>
+                {
+                    ActionCategoryButtonClicked(btn.gameObject.GetComponent<ActionHandler>()._actionSO);                });
+            }
+        }
     }
 
-    public void ActionCategoryButtonClicked()
+    public void MakeActionUI(Event tileEvent)
     {
+        if (tileEvent.Actions.Count > 0)
+        {
+            foreach (Action action in tileEvent.Actions)
+            {
+                GameObject inst = Instantiate(actionPrefab);
+                inst.transform.SetParent(actionListParent);
+                inst.GetComponentInChildren<TextMeshProUGUI>().text = action.actionSO.ActionDisplayName;
+                inst.GetComponent<RectTransform>().localScale = new Vector3(1, 1, 1);
+                inst.GetComponent<ActionItem>().MakePropertyUI(action);
+            }
+        }
+    }
+
+    public void ActionAddButtonClicked()
+    {
+        actionAddButton.gameObject.SetActive(false);
+        actionCategory.gameObject.SetActive(true);
+    }
+
+    public void ActionCategoryButtonClicked(ActionSO actionSO)
+    {
+        Action newAction = new Action();
+        newAction.actionSO = actionSO;
+        targetEvent.AddAction(newAction);
+        
         GameObject inst = Instantiate(actionPrefab);
         inst.transform.SetParent(actionListParent, false);
+        inst.GetComponentInChildren<TextMeshProUGUI>().text = actionSO.ActionDisplayName;
+        inst.GetComponent<ActionItem>().AddProperties(actionSO);
         
         actionAddButton.gameObject.SetActive(true);
         actionCategory.SetActive(false);
         actionCategory.GetComponentInChildren<CategoryMenuHandler>().ToggleExpandMode();
-        EventHandler.GetInstance().RebuildLayout();
     }
-    
 }

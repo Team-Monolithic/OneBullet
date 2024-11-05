@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a58fddfceb360943b923c1647a2ad8c, type: 3}
   m_Name: Floor_Green
   m_EditorClassIdentifier: 
-  buildingCategory: {fileID: 11400000, guid: a89e3663813f8f34da491cbc5836d0db, type: 2}
-  uiCategory: {fileID: 11400000, guid: 5a2a2b5103a9b8446bc4cee0ff9c3694, type: 2}
+  tilemap: {fileID: 11400000, guid: a89e3663813f8f34da491cbc5836d0db, type: 2}
+  tileCategory: {fileID: 11400000, guid: 5a2a2b5103a9b8446bc4cee0ff9c3694, type: 2}
   tileBase: {fileID: 11400000, guid: f46998c3b1706674b9a6e660e56637e5, type: 2}
   placeType: 3
-  tag: 
   displayName: Grass
+  tag: 
+  interactionActions: []

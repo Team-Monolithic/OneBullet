@@ -8,19 +8,19 @@ using UnityEngine.Tilemaps;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class BuildingCreator : Singleton<BuildingCreator>
+public class BuildingManager : Singleton<BuildingManager>
 {
-    [SerializeField] private List<BuildingCategory> categoriesToCreateTilemap; // 동적으로 생성할 타일맵들의 종류
-    [SerializeField] private List<UICategory> categoriesToCreateUI; // 동적으로 생성할 BuildingObject 카테고리
+    [SerializeField] private List<TilemapSO> tilemapsToCreate; // 동적으로 생성할 타일맵들의 종류
+    [SerializeField] private List<TileUICategorySO> tileUICategoriesToCreate; // 동적으로 생성할 BuildingObject 카테고리
     [SerializeField] private Transform tilemapParent; // 동적으로 생성될 타일맵들의 부모 object
-    [SerializeField] private Transform uiParent; // 동적으로 생성될 BuildingObject 셀렉터의 부모 object
-    [SerializeField] private GameObject categoryPrefab; // 동적으로 생성될 셀렉터 UI 중에서 각각의 UI 카테고리 하나를 전체로 묶음
-    [SerializeField] private GameObject categoryItemPrefab; // 동적으로 생성될 셀렉터 UI 중에서 각각의 BuildingObject 아이콘 하나
-    [SerializeField] private Tilemap previewTileMap, defaultMap;
-    [SerializeField] int buildingObjectUISize = 48;
+    [SerializeField] private Transform tileCategoryParent; // 동적으로 생성될 타일 카테고리들의 부모 object
+    [SerializeField] private GameObject tileCategoryPrefab; // 동적으로 생성될 셀렉터 UI 중에서 각각의 UI 카테고리 하나를 전체로 묶음
+    [SerializeField] private GameObject tileCategoryItemPrefab; // 동적으로 생성될 셀렉터 UI 중에서 각각의 BuildingObject 아이콘 하나
+    [SerializeField] private Tilemap previewTilemap, defaultTilemap;
+    [SerializeField] int tileCategoryItemUISize = 48;
     [SerializeField] private Button scriptingTabButton;
 
-    private BuildingCreatorInput _playerInput;
+    private BuildingManagerInput _playerInput;
     private Vector2 _mousePos;
     private Vector3Int _currentGridPosition; // 현재 가리키고 있는 그리드의 idx
     private Vector3Int _lastGridPosition; // 직전 idx (마우스가 이동함에 따라 미리보기 타일을 삭제하기 위함)
@@ -35,8 +35,8 @@ public class BuildingCreator : Singleton<BuildingCreator>
     public Vector3 playerStartPosition = Vector3.back;
     private Vector3Int playerStartCellPosition = Vector3Int.back;
 
-    private Dictionary<UICategory, GameObject>
-        uiCategories = new Dictionary<UICategory, GameObject>(); // 각각의 UI 카테고리(벽, 바닥...)와 UI 카테고리 오브젝트 간의 매핑을 저장 
+    private Dictionary<TileUICategorySO, GameObject>
+        uiCategories = new Dictionary<TileUICategorySO, GameObject>(); // 각각의 UI 카테고리(벽, 바닥...)와 UI 카테고리 오브젝트 간의 매핑을 저장 
 
     private Dictionary<GameObject, Transform>
         buildingObjectItemSlot =
@@ -56,20 +56,20 @@ public class BuildingCreator : Singleton<BuildingCreator>
     {
         get // 각 selectedObj의 카테고리에 해당하는 타일맵의 종류를 리턴
         {
-            if (_selectedObj != null && _selectedObj.BuildingCategory != null &&
-                _selectedObj.BuildingCategory.Tilemap != null)
+            if (_selectedObj != null && _selectedObj.Tilemap != null &&
+                _selectedObj.Tilemap.Tilemap != null)
             {
-                return _selectedObj.BuildingCategory.Tilemap;
+                return _selectedObj.Tilemap.Tilemap;
             }
 
-            return defaultMap;
+            return defaultTilemap;
         }
     }
 
     protected override void Awake()
     {
         base.Awake();
-        _playerInput = new BuildingCreatorInput();
+        _playerInput = new BuildingManagerInput();
         _camera = Camera.main;
     }
 
@@ -82,7 +82,7 @@ public class BuildingCreator : Singleton<BuildingCreator>
     private void Update()
     {
         Vector3 pos = _camera.ScreenToWorldPoint(_mousePos);
-        Vector3Int gridPos = previewTileMap.WorldToCell(pos); // 현재 마우스 위치의 WorldPosition -> GridIndex
+        Vector3Int gridPos = previewTilemap.WorldToCell(pos); // 현재 마우스 위치의 WorldPosition -> GridIndex
 
         if (gridPos != _currentGridPosition) // currentGridPosition 정보 갱신
         {
@@ -126,9 +126,9 @@ public class BuildingCreator : Singleton<BuildingCreator>
     private void UpdatePreview()
     {
         // 이전 위치의 타일을 삭제
-        previewTileMap.SetTile(_lastGridPosition, null);
+        previewTilemap.SetTile(_lastGridPosition, null);
         // 현재 위치에 tileBase를 set
-        previewTileMap.SetTile(_currentGridPosition, _selectedObj ? _selectedObj.TileBase : null);
+        previewTilemap.SetTile(_currentGridPosition, _selectedObj ? _selectedObj.TileBase : null);
     }
 
     private void OnMouseMove(InputAction.CallbackContext ctx)
@@ -159,10 +159,17 @@ public class BuildingCreator : Singleton<BuildingCreator>
         else if (_selectedObj is null && !EventSystem.current.IsPointerOverGameObject() && ctx.interaction is TapInteraction && ctx.phase is InputActionPhase.Started)
         {
             BuildingObjectBase selectedTile = GetTileAtPosition(_currentGridPosition);
+            ScriptingManager.GetInstance().ToggleSelectedTileMode(selectedTile is not null);
             if (selectedTile is not null)
             {
                 ScriptingManager.GetInstance().SetTileInfo(selectedTile); // ScriptingTab에 해당 타일의 정보를 표시함
+                ScriptingManager.GetInstance().SetTileEvents(selectedTile);
                 scriptingTabButton.onClick.Invoke(); // 자동으로 Scripting Tab으로 전환
+                ScriptingManager.GetInstance().SelectedTile = selectedTile;
+            }
+            else
+            {
+                ScriptingManager.GetInstance().SelectedTile = null;
             }
         }
     }
@@ -176,7 +183,7 @@ public class BuildingCreator : Singleton<BuildingCreator>
         else
         {
             Vector3 pos = _camera.ScreenToWorldPoint(_mousePos);
-            Vector3Int gridPos = previewTileMap.WorldToCell(pos); // 현재 마우스 위치의 WorldPosition -> GridIndex
+            Vector3Int gridPos = previewTilemap.WorldToCell(pos); // 현재 마우스 위치의 WorldPosition -> GridIndex
 
             // 가장 위의 index에 해당하는 맵의 타일을 지운다
             generatedTilemaps.Any(map =>
@@ -210,7 +217,7 @@ public class BuildingCreator : Singleton<BuildingCreator>
 
     private void InitializeMaps() // categoriesToCreateTilemap에 포함된 BuildingCategory마다 각각의 타일맵을 생성
     {
-        foreach (BuildingCategory category in categoriesToCreateTilemap)
+        foreach (TilemapSO category in tilemapsToCreate)
         {
             GameObject obj = new GameObject("Tilemap_" + category.name);
             Tilemap map = obj.AddComponent<Tilemap>();
@@ -246,10 +253,10 @@ public class BuildingCreator : Singleton<BuildingCreator>
 
     private void BuildUI() // categoriesToCreateUI에 포함된 UICategory마다 각각의 UI 섹션을 생성
     {
-        foreach (UICategory category in categoriesToCreateUI)
+        foreach (TileUICategorySO category in tileUICategoriesToCreate)
         {
-            var inst = Instantiate(categoryPrefab, Vector3.zero, Quaternion.identity);
-            inst.transform.SetParent(uiParent, false);
+            var inst = Instantiate(tileCategoryPrefab, Vector3.zero, Quaternion.identity);
+            inst.transform.SetParent(tileCategoryParent, false);
             inst.name = "Category_" + category.name;
             inst.GetComponentInChildren<TextMeshProUGUI>().text = category.name;
             inst.transform.SetSiblingIndex(category.SiblingIndex);
@@ -269,23 +276,23 @@ public class BuildingCreator : Singleton<BuildingCreator>
             }
 
             // categoryGameObject: 이 buildingObject의 UI Category에 해당하는 셀렉터UI 상의 부모 오브젝트
-            GameObject categoryGameObject = uiCategories[buildingObject.UICategory];
+            GameObject categoryGameObject = uiCategories[buildingObject.TileCategory];
             // itemsParent: 셀렉터UI 하에 있는, buildingObject들을 하위 아이템으로 갖는 wrapper Object ('Items' 에 해당)
             var itemsParent = buildingObjectItemSlot[categoryGameObject];
 
-            var inst = Instantiate(categoryItemPrefab, Vector3.zero, Quaternion.identity);
+            var inst = Instantiate(tileCategoryItemPrefab, Vector3.zero, Quaternion.identity);
             inst.transform.SetParent(itemsParent);
             inst.name = buildingObject.name;
-            inst.GetComponent<RectTransform>().sizeDelta = new Vector2(buildingObjectUISize, buildingObjectUISize);
+            inst.GetComponent<RectTransform>().sizeDelta = new Vector2(tileCategoryItemUISize, tileCategoryItemUISize);
 
             Image img = inst.GetComponent<Image>();
             Tile tile = (Tile)buildingObject.TileBase;
             img.sprite = tile.sprite;
-            img.GetComponent<RectTransform>().sizeDelta = new Vector2(buildingObjectUISize, buildingObjectUISize);
+            img.GetComponent<RectTransform>().sizeDelta = new Vector2(tileCategoryItemUISize, tileCategoryItemUISize);
             img.GetComponent<RectTransform>().localScale = new Vector3(1, 1, 1);
 
             // 실제 배치될 BuildingObject를 셀렉터UI 상의 아이템과 연결
-            var script = inst.GetComponent<BuildingButtonHandler>();
+            var script = inst.GetComponent<TileUIHandler>();
             script.Item = buildingObject;
         }
     }
@@ -335,26 +342,26 @@ public class BuildingCreator : Singleton<BuildingCreator>
                 _selectedObj.PlaceType == PlaceType.Rectangle)
             {
                 DrawBounds(tilemap);
-                previewTileMap.ClearAllTiles();
+                previewTilemap.ClearAllTiles();
             }
         }
     }
 
     private void RectangleRenderer()
     {
-        previewTileMap.ClearAllTiles();
+        previewTilemap.ClearAllTiles();
 
         bounds.xMin = _currentGridPosition.x < holdStartPosiiton.x ? _currentGridPosition.x : holdStartPosiiton.x;
         bounds.xMax = _currentGridPosition.x > holdStartPosiiton.x ? _currentGridPosition.x : holdStartPosiiton.x;
         bounds.yMin = _currentGridPosition.y < holdStartPosiiton.y ? _currentGridPosition.y : holdStartPosiiton.y;
         bounds.yMax = _currentGridPosition.y > holdStartPosiiton.y ? _currentGridPosition.y : holdStartPosiiton.y;
 
-        DrawBounds(previewTileMap);
+        DrawBounds(previewTilemap);
     }
 
     private void LineRenderer()
     {
-        previewTileMap.ClearAllTiles();
+        previewTilemap.ClearAllTiles();
 
         float diffX = Mathf.Abs(_currentGridPosition.x - holdStartPosiiton.x);
         float diffY = Mathf.Abs(_currentGridPosition.y - holdStartPosiiton.y);
@@ -374,7 +381,7 @@ public class BuildingCreator : Singleton<BuildingCreator>
             bounds.yMax = _currentGridPosition.y > holdStartPosiiton.y ? _currentGridPosition.y : holdStartPosiiton.y;
         }
 
-        DrawBounds(previewTileMap);
+        DrawBounds(previewTilemap);
     }
 
     private void DrawBounds(Tilemap targetMap) // Bounds로 설정된 직사각형 영역에 setTile
@@ -386,14 +393,14 @@ public class BuildingCreator : Singleton<BuildingCreator>
                 Vector3Int position = new Vector3Int(x, y, 0);
                 targetMap.SetTile(position, _selectedObj.TileBase);
                 
-                if (targetMap != previewTileMap)
+                if (targetMap != previewTilemap)
                 {
                     tileInfo[targetMap].SetTileAtPosition(position, _selectedObj);
                 }
             }
         }
 
-        if (targetMap != previewTileMap)
+        if (targetMap != previewTilemap)
         {
             BuildingHistoryItem item = new BuildingHistoryItem(BuildingHistoryType.Placing, targetMap, _selectedObj.TileBase,
                 Vector3Int.zero, Vector3Int.zero, bounds, false);
