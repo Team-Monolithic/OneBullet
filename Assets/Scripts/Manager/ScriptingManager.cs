@@ -4,8 +4,14 @@ using System.Collections.Generic;
 using TMPro;
 using Unity.Properties;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.Tilemaps;
 using UnityEngine.UI;
+
+static class Constants
+{
+    public const int MAX_TRIGGER_NUM = 10;
+}
 
 public class ScriptingManager : Singleton<ScriptingManager>
 {
@@ -28,9 +34,8 @@ public class ScriptingManager : Singleton<ScriptingManager>
     [SerializeField] private GameObject actionUIPrefab;
     [SerializeField] private Transform actionCategoryParent;
 
-    [SerializeField] public GameObject actionCategoryTemp;
-    
-    private Dictionary<int, List<ActionSO>> triggerActions;
+    [SerializeField] public GameObject actionCategoryTemp; // 미리 만들어 놓는 카테고리들의 부모 오브젝트
+
     private Dictionary<EventCategorySO, GameObject> eventCategories = new Dictionary<EventCategorySO, GameObject>();
     private Dictionary<EventCategorySO, Transform> eventCategorySlot = new Dictionary<EventCategorySO, Transform>();
     private Dictionary<ActionCategorySO, GameObject> actionCategories = new Dictionary<ActionCategorySO, GameObject>();
@@ -75,15 +80,16 @@ public class ScriptingManager : Singleton<ScriptingManager>
         GameObject eventGameObject = Instantiate(eventUIPrefab);
         eventGameObject.transform.SetParent(eventsParent);
         eventGameObject.GetComponent<EventItem>().TargetEvent = tileEvent;
-        eventGameObject.GetComponent<EventItem>().eventTitleText.text = tileEvent.eventType.ToString();
+        eventGameObject.GetComponent<EventItem>().eventTitleText.text = tileEvent.eventSO.EventDisplayName;
         eventGameObject.GetComponent<RectTransform>().localScale = new Vector3(1, 1, 1);
         eventGameObject.GetComponent<EventItem>().AddActionCategory();
+        eventGameObject.GetComponent<EventItem>().MakePropertyUI(tileEvent);
         eventGameObject.GetComponent<EventItem>().MakeActionUI(tileEvent); // 이 이벤트가 가진 액션들을 생성. event->actions 참조함
     }
 
     private void Start()
     {
-        // FireTrigger(0);
+        EventPublisher.GetInstance().TriggerEvent(0); // 0번은 '게임 시작 시' 트리거
         BuildEventCategories();
         BuildActionCategories();
     }
@@ -93,25 +99,7 @@ public class ScriptingManager : Singleton<ScriptingManager>
         LayoutRebuilder.ForceRebuildLayoutImmediate(layoutGroup);
     }
 
-    public void FireTrigger(int triggerNumber)
-    {
-        if (triggerActions.ContainsKey(triggerNumber) == false)
-        {
-            return;
-        }
-        
-        foreach (ActionSO action in triggerActions[triggerNumber])
-        {
-            ExecuteAction(action);
-        }
-    }
-
-    public void ExecuteAction(ActionSO targetAction)
-    {
-        Debug.Log(targetAction.ActionDisplayName + " Executed");
-    }
-
-    private void BuildEventCategories()
+    private void BuildEventCategories() // Scriptable Object들로부터 이벤트 카테고리를 추가
     {
         EventCategorySO[] categories = Resources.LoadAll<EventCategorySO>("Scriptables/EventCategories");
         foreach (EventCategorySO category in categories)
@@ -136,12 +124,11 @@ public class ScriptingManager : Singleton<ScriptingManager>
             eventGameObject.GetComponent<RectTransform>().localScale = new Vector3(1, 1, 1);
             eventGameObject.GetComponent<Button>().onClick.AddListener(() =>
             {
-                EventCategoryButtonClicked(ev.EventType);
+                EventCategoryButtonClicked(ev);
             });
         }
     }
-    // Action Category를 미리 만들어 두고 재사용
-    private void BuildActionCategories()
+    private void BuildActionCategories() // 액션 카테고리를 추가. (임시 오브젝트에 만들어 두고 사용)
     {
         ActionCategorySO[] categories = Resources.LoadAll<ActionCategorySO>("Scriptables/ActionCategories");
         foreach (ActionCategorySO category in categories)
@@ -176,27 +163,24 @@ public class ScriptingManager : Singleton<ScriptingManager>
         eventAddButton.gameObject.SetActive(false);
     }
     
-    public void EventCategoryButtonClicked(EventType eventType) // 새로운 이벤트를 생성
+    public void EventCategoryButtonClicked(EventSO eventSO) // 새로운 이벤트를 생성
     {
         eventCategoryParent.gameObject.SetActive(false);
         eventAddButton.gameObject.SetActive(true);
 
-        Event newEvent = new Event(eventType);
+        Event newEvent = new Event();
         selectedTile.events.Add(newEvent);
+        newEvent.eventSO = eventSO;
         newEvent.ownerTile = selectedTile; // 현재 선택된 tile을 ownerTile로 설정 -> 이후 프로퍼티 설정 시에 참조할 수 있도록 함
         MakeEventUI(newEvent);
     }
 }
 public class Event
 {
-    public EventType eventType;
+    public EventSO eventSO;
+    public Dictionary<string, EventProperty> properties = new Dictionary<string, EventProperty>(); // 이벤트가 갖는 프로퍼티의 실질 값
     public List<Action> actions = new List<Action>();
     public BuildingObjectBase ownerTile; // 어떤 타일에 부착된 event인지
-    
-    public Event(EventType type)
-    {
-        eventType = type;
-    }
 
     public void AddAction(Action inAction)
     {
@@ -210,4 +194,65 @@ public class Action
     public Event ownerEvent;
     public Dictionary<string, ActionProperty> properties = new Dictionary<string, ActionProperty>();
 
+    public void executeAction()
+    {
+        Debug.Log("action " + actionSO.ActionDisplayName + " executed");
+    }
+}
+
+public delegate void TriggerHandler();
+
+public class EventPublisher : Singleton<EventPublisher>
+{
+    private TriggerHandler[] triggerHandlers = new TriggerHandler[Constants.MAX_TRIGGER_NUM];
+
+    public void TriggerEvent(int idx)
+    {
+        if (0 < idx && idx < Constants.MAX_TRIGGER_NUM && triggerHandlers[idx] != null) // 0번은 '게임 시작 시' 트리거
+        {
+            triggerHandlers[idx].Invoke();
+        }
+    }
+
+    public void RegisterTrigger(int idx, TriggerHandler handler)
+    {
+        if (IsRegistered(idx, handler) == true)
+        {
+            return;
+        }
+        
+        if (0 < idx && idx < Constants.MAX_TRIGGER_NUM) // 0번은 '게임 시작 시' 트리거
+        {
+            triggerHandlers[idx] += handler;
+        }
+    }
+
+    public void UnregisterTrigger(int idx, TriggerHandler handler)
+    {
+        if (IsRegistered(idx, handler) == false)
+        {
+            return;
+        }
+
+        if (0 < idx && idx < Constants.MAX_TRIGGER_NUM) // 0번은 '게임 시작 시' 트리거
+        {
+            triggerHandlers[idx] -= handler;
+        }
+    }
+
+    public bool IsRegistered(int idx, TriggerHandler handler)
+    {
+        if (triggerHandlers[idx] != null)   
+        {
+            foreach (Delegate existingHandler in triggerHandlers[idx].GetInvocationList())
+            {
+                // 해당 델리게이트가 이미 바인딩되어 있다면 아무 작업도 하지 않는다
+                if (existingHandler.Method == handler.Method && existingHandler.Target == handler.Target)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }

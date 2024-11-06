@@ -19,7 +19,7 @@ public class ActionSO : ScriptableObject
     
     public ActionCategorySO ActionCategory => actionCategory;
 
-    public ActionType SOActionType => actionType;
+    public ActionType ActionType => actionType;
     public string ActionDisplayName => actionDisplayName;
 }
 
@@ -27,13 +27,12 @@ public class ActionSO : ScriptableObject
 public class ActionProperty
 {
     public string name;
-    public PropertyType type;
+    public ActionPropertyType type;
     public object value;
 
-    public enum PropertyType
+    public enum ActionPropertyType
     {
         Float,
         Int,
-        Vector2
     }
 }

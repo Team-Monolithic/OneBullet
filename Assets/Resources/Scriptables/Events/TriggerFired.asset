@@ -14,3 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   eventCategory: {fileID: 11400000, guid: 348621de327d803499e8b1afd3f5e4e9, type: 2}
   eventType: 1
+  eventDisplayName: Trigger Fired
+  properties:
+  - name: TriggerNumber
+    type: 0

@@ -107,6 +107,8 @@ public class BuildingManager : Singleton<BuildingManager>
         _playerInput.Gameplay.MouseRightClick.performed += OnRightClick;
         _playerInput.Gameplay.Undo.performed += OnUndoPressed;
         _playerInput.Gameplay.Redo.performed += OnRedoPressed;
+
+        _playerInput.Gameplay.FireTrigger.performed += FireTriggered; // 트리거 발동 테스트용
     }
 
     private void OnDisable()
@@ -119,7 +121,17 @@ public class BuildingManager : Singleton<BuildingManager>
         _playerInput.Gameplay.MouseRightClick.performed -= OnRightClick;
         _playerInput.Gameplay.Undo.performed -= OnUndoPressed;
         _playerInput.Gameplay.Redo.performed -= OnRedoPressed;
+
+        _playerInput.Gameplay.FireTrigger.performed -= FireTriggered; // 트리거 발동 테스트용
     }
+    
+    /* trigger test */
+    private void FireTriggered(InputAction.CallbackContext ctx)
+    {
+        Debug.Log("trigger fired");
+        EventPublisher.GetInstance().TriggerEvent(1);
+    }
+    /* trigger test */
 
     // 타일을 배치하기 전, 타일을 선택한 채로 마우스를 이동하면 마우스 포인터를 따라 미리보기 타일을 생성하는 기능
     private void UpdatePreview()

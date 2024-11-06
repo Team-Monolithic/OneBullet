@@ -1,5 +1,5 @@
 {
-    "name": "BuildingCreatorInput",
+    "name": "BuildingManagerInput",
     "maps": [
         {
             "name": "Gameplay",
@@ -45,6 +45,15 @@
                     "name": "Redo",
                     "type": "Button",
                     "id": "11b9fb84-0c7f-43d7-afb9-be8742fdb9de",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "FireTrigger",
+                    "type": "Button",
+                    "id": "c0eeb489-622c-4de5-923f-e9753dec4978",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -150,6 +159,17 @@
                     "action": "Redo",
                     "isComposite": false,
                     "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "6188381a-f2c9-4812-b2fa-c2f2f2b83ebd",
+                    "path": "<Keyboard>/q",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "FireTrigger",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         }
