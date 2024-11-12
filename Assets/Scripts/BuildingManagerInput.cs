@@ -71,6 +71,15 @@ public partial class @BuildingManagerInput: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""FireTrigger"",
+                    ""type"": ""Button"",
+                    ""id"": ""c0eeb489-622c-4de5-923f-e9753dec4978"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -172,6 +181,17 @@ public partial class @BuildingManagerInput: IInputActionCollection2, IDisposable
                     ""action"": ""Redo"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""6188381a-f2c9-4812-b2fa-c2f2f2b83ebd"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""FireTrigger"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -185,6 +205,7 @@ public partial class @BuildingManagerInput: IInputActionCollection2, IDisposable
         m_Gameplay_MousePosition = m_Gameplay.FindAction("MousePosition", throwIfNotFound: true);
         m_Gameplay_Undo = m_Gameplay.FindAction("Undo", throwIfNotFound: true);
         m_Gameplay_Redo = m_Gameplay.FindAction("Redo", throwIfNotFound: true);
+        m_Gameplay_FireTrigger = m_Gameplay.FindAction("FireTrigger", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -251,6 +272,7 @@ public partial class @BuildingManagerInput: IInputActionCollection2, IDisposable
     private readonly InputAction m_Gameplay_MousePosition;
     private readonly InputAction m_Gameplay_Undo;
     private readonly InputAction m_Gameplay_Redo;
+    private readonly InputAction m_Gameplay_FireTrigger;
     public struct GameplayActions
     {
         private @BuildingManagerInput m_Wrapper;
@@ -260,6 +282,7 @@ public partial class @BuildingManagerInput: IInputActionCollection2, IDisposable
         public InputAction @MousePosition => m_Wrapper.m_Gameplay_MousePosition;
         public InputAction @Undo => m_Wrapper.m_Gameplay_Undo;
         public InputAction @Redo => m_Wrapper.m_Gameplay_Redo;
+        public InputAction @FireTrigger => m_Wrapper.m_Gameplay_FireTrigger;
         public InputActionMap Get() { return m_Wrapper.m_Gameplay; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -284,6 +307,9 @@ public partial class @BuildingManagerInput: IInputActionCollection2, IDisposable
             @Redo.started += instance.OnRedo;
             @Redo.performed += instance.OnRedo;
             @Redo.canceled += instance.OnRedo;
+            @FireTrigger.started += instance.OnFireTrigger;
+            @FireTrigger.performed += instance.OnFireTrigger;
+            @FireTrigger.canceled += instance.OnFireTrigger;
         }
 
         private void UnregisterCallbacks(IGameplayActions instance)
@@ -303,6 +329,9 @@ public partial class @BuildingManagerInput: IInputActionCollection2, IDisposable
             @Redo.started -= instance.OnRedo;
             @Redo.performed -= instance.OnRedo;
             @Redo.canceled -= instance.OnRedo;
+            @FireTrigger.started -= instance.OnFireTrigger;
+            @FireTrigger.performed -= instance.OnFireTrigger;
+            @FireTrigger.canceled -= instance.OnFireTrigger;
         }
 
         public void RemoveCallbacks(IGameplayActions instance)
@@ -327,5 +356,6 @@ public partial class @BuildingManagerInput: IInputActionCollection2, IDisposable
         void OnMousePosition(InputAction.CallbackContext context);
         void OnUndo(InputAction.CallbackContext context);
         void OnRedo(InputAction.CallbackContext context);
+        void OnFireTrigger(InputAction.CallbackContext context);
     }
 }

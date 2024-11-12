@@ -14,3 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   eventCategory: {fileID: 11400000, guid: a2133f366c8601d45b3d7276f5835410, type: 2}
   eventType: 0
+  eventDisplayName: Started
+  properties: []
