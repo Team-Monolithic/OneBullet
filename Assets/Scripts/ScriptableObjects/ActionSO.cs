@@ -19,33 +19,20 @@ public class ActionSO : ScriptableObject
     
     public ActionCategorySO ActionCategory => actionCategory;
 
-    public ActionType SOActionType => actionType;
+    public ActionType ActionType => actionType;
     public string ActionDisplayName => actionDisplayName;
-
-    public void AddProperty(string name, ActionProperty.PropertyType type)
-    {
-        ActionProperty newProperty = new ActionProperty { name = name, type = type };
-        System.Array.Resize(ref properties, properties.Length + 1);
-        properties[properties.Length - 1] = newProperty;
-    }
 }
 
 [System.Serializable]
 public class ActionProperty
 {
     public string name;
-    public PropertyType type;
+    public ActionPropertyType type;
     public object value;
 
-    public enum PropertyType
+    public enum ActionPropertyType
     {
         Float,
         Int,
-        Vector3
-    }
-
-    public object GetValue()
-    {
-        return value;
     }
 }

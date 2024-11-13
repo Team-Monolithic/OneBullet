@@ -38,6 +38,10 @@ PrefabInstance:
 
 '
       objectReference: {fileID: 0}
+    - target: {fileID: 683777609333427968, guid: ade9b3f0fdd0944449ccbb1cfa3b8de2, type: 3}
+      propertyPath: m_HorizontalFit
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 1421198615972670667, guid: ade9b3f0fdd0944449ccbb1cfa3b8de2, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1
@@ -148,7 +152,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6795918212930870423, guid: ade9b3f0fdd0944449ccbb1cfa3b8de2, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 400
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6795918212930870423, guid: ade9b3f0fdd0944449ccbb1cfa3b8de2, type: 3}
       propertyPath: m_SizeDelta.y
@@ -202,6 +206,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7878006557216477850, guid: ade9b3f0fdd0944449ccbb1cfa3b8de2, type: 3}
+      propertyPath: m_PreferredWidth
+      value: 400
+      objectReference: {fileID: 0}
     - target: {fileID: 8190010689977640300, guid: ade9b3f0fdd0944449ccbb1cfa3b8de2, type: 3}
       propertyPath: m_Color.b
       value: 0.6385364
@@ -217,6 +225,10 @@ PrefabInstance:
     - target: {fileID: 8526413227050322057, guid: ade9b3f0fdd0944449ccbb1cfa3b8de2, type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8863108806348880301, guid: ade9b3f0fdd0944449ccbb1cfa3b8de2, type: 3}
+      propertyPath: m_ChildControlWidth
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8863108806348880301, guid: ade9b3f0fdd0944449ccbb1cfa3b8de2, type: 3}
       propertyPath: m_ChildControlHeight
@@ -285,7 +297,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_HorizontalFit: 0
+  m_HorizontalFit: 2
   m_VerticalFit: 2
 --- !u!224 &5096517565086602985 stripped
 RectTransform:
@@ -322,3 +334,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   propertyListParent: {fileID: 5096517565086602985}
   propertyPrefab: {fileID: 6874839216070817964, guid: 034203079c9e40b41876ef3fb459bfb7, type: 3}
+  multiInputPropertyPrefab: {fileID: 6874839216070817964, guid: 810acbe692c533b4399d30c6d254579a, type: 3}
