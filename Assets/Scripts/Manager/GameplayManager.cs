@@ -42,7 +42,7 @@ public class GameplayManager : Singleton<GameplayManager>
         }
 
         // Spawn
-        var playerObj = Instantiate(playerCharacter, creator.playerStartPosition, Quaternion.identity).GetComponent<PlayerController>();
+        var playerObj = Instantiate(playerCharacter, buildingManager.playerStartPosition, Quaternion.identity).GetComponent<PlayerController>();
         playerObj.name = playerCharacter.name;
         conditionCheckManager.Initialize();
         // TODO : 모든 오브젝트 정위치

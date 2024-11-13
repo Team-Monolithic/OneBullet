@@ -4,10 +4,10 @@ public class Condition
 {
     private readonly Func<ITrackedProperty> _propertyGetter;
     private readonly Func<object, bool> _conditionCheck;
-    private readonly Action _onConditionMet;
-    private Action<object> _unsubscribeHandler;  // 구독 해제 핸들러 저장
+    private readonly System.Action _onConditionMet;
+    private System.Action<object> _unsubscribeHandler;  // 구독 해제 핸들러 저장
 
-    public Condition(Func<ITrackedProperty> propertyGetter, Func<object, bool> conditionCheck, Action onConditionMet)
+    public Condition(Func<ITrackedProperty> propertyGetter, Func<object, bool> conditionCheck, System.Action onConditionMet)
     {
         _propertyGetter = propertyGetter ?? throw new ArgumentNullException(nameof(propertyGetter));
         _conditionCheck = conditionCheck ?? throw new ArgumentNullException(nameof(conditionCheck));

@@ -25,11 +25,11 @@ public class ConditionFactory
 {
     private readonly Dictionary<string, ITrackableObject> _objectRegistry;
     private readonly Dictionary<string, Dictionary<string, ITrackedProperty>> _propertyCache; // 캐시 추가
-    private readonly Action _onGameWinConditionMet;
-    private readonly Action _onGameLoseConditionMet;
+    private readonly System.Action _onGameWinConditionMet;
+    private readonly System.Action _onGameLoseConditionMet;
 
     //생성자
-    public ConditionFactory(Action onGameWinConditionMet, Action onGameLoseConditionMet)
+    public ConditionFactory(System.Action onGameWinConditionMet, System.Action onGameLoseConditionMet)
     {
         _objectRegistry = new Dictionary<string, ITrackableObject>();
         _propertyCache = new Dictionary<string, Dictionary<string, ITrackedProperty>>();
@@ -108,7 +108,7 @@ public class ConditionFactory
     }
 
     // 조건 타입에 따라 적절한 콜백을 반환하는 함수
-    private Action GetConditionCallback(ConditionType conditionType)
+    private System.Action GetConditionCallback(ConditionType conditionType)
     {
         return conditionType == ConditionType.GameWin ? _onGameWinConditionMet : _onGameLoseConditionMet;
     }
