@@ -95,6 +95,7 @@ public class EventItem : MonoBehaviour
     {
         Action newAction = new Action();
         newAction.actionSO = actionSO;
+        newAction.ownerEvent = targetEvent;
         targetEvent.AddAction(newAction);
         
         GameObject inst = Instantiate(actionPrefab);

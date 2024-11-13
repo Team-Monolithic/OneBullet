@@ -86,13 +86,13 @@ public class BuildingHistoryManager : Singleton<BuildingHistoryManager>
         }
         else if (item.BuildingHistoryType == BuildingHistoryType.Placing)
         {
-            if (item.IsSingle) // 단일 설치
+            if (item.Bound is null) // 단일 설치
             {
                 item.Map.SetTile(item.NewPosition, isUndo ? null : item.TileBase);
             }
             else // 범위 설치 (Line, Rectangle)
             {
-                BoundsInt bound = item.Bound;
+                BoundsInt bound = (BoundsInt)item.Bound;
                 for (int x = bound.xMin; x <= bound.xMax; x++)
                 {
                     for (int y = bound.yMin; y <= bound.yMax; y++)
@@ -114,7 +114,7 @@ public class BuildingHistoryItem
     private TileBase tileBase;
     private Vector3Int prevPosition;
     private Vector3Int newPosition;
-    private BoundsInt bound;
+    private BoundsInt? bound;
     private bool isSingle;
     
     // todo : script 관련 멤버 추가
@@ -124,12 +124,12 @@ public class BuildingHistoryItem
     public TileBase TileBase => tileBase;
     public Vector3Int PrevPosition => prevPosition;
     public Vector3Int NewPosition => newPosition;
-    public BoundsInt Bound => bound;
+    public BoundsInt? Bound => bound;
     public bool IsSingle => isSingle;
     
 
     public BuildingHistoryItem(BuildingHistoryType type, Tilemap map, TileBase tileBase, Vector3Int prevPosition,
-        Vector3Int newPosition, BoundsInt bound, bool isSingle)
+        Vector3Int newPosition, BoundsInt? bound)
     {
         this.buildingHistoryType = type;
         this.map = map;
@@ -137,7 +137,6 @@ public class BuildingHistoryItem
         this.prevPosition = prevPosition;
         this.newPosition = newPosition;
         this.bound = bound;
-        this.isSingle = isSingle;
     }
     
 }

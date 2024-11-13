@@ -25,8 +25,9 @@ public class BuildingManager : Singleton<BuildingManager>
     private Vector3Int _currentGridPosition; // 현재 가리키고 있는 그리드의 idx
     private Vector3Int _lastGridPosition; // 직전 idx (마우스가 이동함에 따라 미리보기 타일을 삭제하기 위함)
     private Camera _camera;
-    private BuildingObjectBase _selectedObj;
+    public BuildingObjectBaseSO selectedObj;
     private List<Tilemap> generatedTilemaps = new List<Tilemap>();
+    private Dictionary<TilemapSO, Tilemap> tilemaps = new Dictionary<TilemapSO, Tilemap>();
 
     private bool holdActive; // 현재 마우스를 누르고 있는 상태인지
     private Vector3Int holdStartPosiiton; // 마우스를 처음 누른 지점의 좌표
@@ -42,26 +43,16 @@ public class BuildingManager : Singleton<BuildingManager>
         buildingObjectItemSlot =
             new Dictionary<GameObject, Transform>(); // 각각의 BuildingObject와 UI 카테고리 오브젝트 부모 (ui category 아래의 'Items' 오브젝트) 간의 매핑을 저장
     private Dictionary<Tilemap, MapTileInfo> tileInfo = new Dictionary<Tilemap, MapTileInfo>(); // 각 타일맵의 모든 타일 정보를 딕셔너리 안의 딕셔너리로 저장
-    
-    private BuildingObjectBase SelectedObj
-    {
-        set
-        {
-            _selectedObj = value;
-            UpdatePreview();
-        }
-    }
 
     private Tilemap tilemap
     {
         get // 각 selectedObj의 카테고리에 해당하는 타일맵의 종류를 리턴
         {
-            if (_selectedObj != null && _selectedObj.Tilemap != null &&
-                _selectedObj.Tilemap.Tilemap != null)
+            foreach (var pair in tilemaps)
             {
-                return _selectedObj.Tilemap.Tilemap;
+                if (selectedObj.TilemapSO == pair.Key)
+                    return pair.Value;
             }
-
             return defaultTilemap;
         }
     }
@@ -89,10 +80,13 @@ public class BuildingManager : Singleton<BuildingManager>
             _lastGridPosition = _currentGridPosition;
             _currentGridPosition = gridPos;
 
-            UpdatePreview();
-            if (holdActive && _selectedObj.PlaceType > PlaceType.Single)
+            if (selectedObj != null)
             {
-                HandleDrawing();
+                UpdatePreview();
+                if (holdActive && selectedObj.PlaceType > PlaceType.Single)
+                {
+                    HandleDrawing();
+                }
             }
         }
     }
@@ -139,7 +133,7 @@ public class BuildingManager : Singleton<BuildingManager>
         // 이전 위치의 타일을 삭제
         previewTilemap.SetTile(_lastGridPosition, null);
         // 현재 위치에 tileBase를 set
-        previewTilemap.SetTile(_currentGridPosition, _selectedObj ? _selectedObj.TileBase : null);
+        previewTilemap.SetTile(_currentGridPosition, selectedObj  ? selectedObj.TileBase : null);
     }
 
     private void OnMouseMove(InputAction.CallbackContext ctx)
@@ -149,7 +143,7 @@ public class BuildingManager : Singleton<BuildingManager>
 
     private void OnLeftClick(InputAction.CallbackContext ctx)
     {
-        if (_selectedObj is not null && !EventSystem.current.IsPointerOverGameObject())
+        if (selectedObj is not null && !EventSystem.current.IsPointerOverGameObject())
         {
             if (ctx.phase == InputActionPhase.Started && ctx.interaction is TapInteraction) // 누르기 시작.
                 // 'TapInteraction' 조건이 없으면 SlowTapInteraction.Started에서 값이 갱신되어 마우스를 빠르게 이동시키는 경우 끊기게 되거나 single Placetype의 경우 두 개가 설치된다.
@@ -167,9 +161,9 @@ public class BuildingManager : Singleton<BuildingManager>
             }
         }
         // 선택한 타일이 없는 채로 타일맵을 클릭하면, 해당 위치의 타일을 선택한다.
-        else if (_selectedObj is null && !EventSystem.current.IsPointerOverGameObject() && ctx.interaction is TapInteraction && ctx.phase is InputActionPhase.Started)
+        else if (selectedObj is null && !EventSystem.current.IsPointerOverGameObject() && ctx.interaction is TapInteraction && ctx.phase is InputActionPhase.Started)
         {
-            BuildingObjectBase selectedTile = GetTileAtPosition(_currentGridPosition);
+            BuildingTile selectedTile = GetTileAtPosition(_currentGridPosition);
             ScriptingManager.GetInstance().ToggleSelectedTileMode(selectedTile is not null);
             if (selectedTile is not null)
             {
@@ -187,9 +181,10 @@ public class BuildingManager : Singleton<BuildingManager>
 
     private void OnRightClick(InputAction.CallbackContext ctx)
     {
-        if (_selectedObj is not null) // 선택 해제
+        if (selectedObj is not null) // 선택 해제
         {
-            SelectedObj = null;
+            selectedObj = null;
+            UpdatePreview();
         }
         else
         {
@@ -221,9 +216,9 @@ public class BuildingManager : Singleton<BuildingManager>
     }
 
 
-    public void SelectObject(BuildingObjectBase obj)
+    public void SelectObject(BuildingObjectBaseSO obj)
     {
-        SelectedObj = obj;
+        selectedObj = obj;
     }
 
     private void InitializeMaps() // categoriesToCreateTilemap에 포함된 BuildingCategory마다 각각의 타일맵을 생성
@@ -245,14 +240,14 @@ public class BuildingManager : Singleton<BuildingManager>
             obj.transform.SetParent(tilemapParent);
 
             tilemapRenderer.sortingOrder = category.SortingOrder;
-            category.Tilemap = map;
 
-            generatedTilemaps.Add(map);
+            tilemaps[category] = map;
             tileInfo[map] = new MapTileInfo();
+            generatedTilemaps.Add(map);
         }
 
-        // generatedTilemaps = FindObjectsOfType<Tilemap>().ToList();
         // sortingOrder 내림차순으로 정렬 (가장 위에 표시될 타일맵의 타일부터 탐색할 수 있도록)
+        // generatedTilemaps = FindObjectsOfType<Tilemap>().ToList();
         generatedTilemaps.Sort((a, b) =>
         {
             TilemapRenderer aRenderer = a.GetComponent<TilemapRenderer>();
@@ -278,14 +273,14 @@ public class BuildingManager : Singleton<BuildingManager>
                 inst.transform.Find("Items"); // 이 셀렉터UI 안에서 아이템들이 추가되어 갈 곳은 'inst.transform.Find("Items")'
         }
 
-        BuildingObjectBase[] buildables = GetAllBuildableObjects(); // Resources 폴더 하의 모든 BuildingObject들을 가져옴
-        foreach (BuildingObjectBase buildingObject in buildables)
+        BuildingObjectBaseSO[] buildables = GetAllBuildableObjects(); // Resources 폴더 하의 모든 BuildingObject들을 가져옴
+        foreach (BuildingObjectBaseSO buildingObject in buildables)
         {
             if (buildingObject == null)
             {
                 continue;
             }
-
+            
             // categoryGameObject: 이 buildingObject의 UI Category에 해당하는 셀렉터UI 상의 부모 오브젝트
             GameObject categoryGameObject = uiCategories[buildingObject.TileCategory];
             // itemsParent: 셀렉터UI 하에 있는, buildingObject들을 하위 아이템으로 갖는 wrapper Object ('Items' 에 해당)
@@ -295,7 +290,7 @@ public class BuildingManager : Singleton<BuildingManager>
             inst.transform.SetParent(itemsParent);
             inst.name = buildingObject.name;
             inst.GetComponent<RectTransform>().sizeDelta = new Vector2(tileCategoryItemUISize, tileCategoryItemUISize);
-
+            
             Image img = inst.GetComponent<Image>();
             Tile tile = (Tile)buildingObject.TileBase;
             img.sprite = tile.sprite;
@@ -304,36 +299,30 @@ public class BuildingManager : Singleton<BuildingManager>
 
             // 실제 배치될 BuildingObject를 셀렉터UI 상의 아이템과 연결
             var script = inst.GetComponent<TileUIHandler>();
-            script.Item = buildingObject;
+            script.BaseSO = buildingObject;
         }
     }
 
-    private BuildingObjectBase[] GetAllBuildableObjects()
+    private BuildingObjectBaseSO[] GetAllBuildableObjects()
     {
-        return Resources.LoadAll<BuildingObjectBase>("Scriptables/Buildables");
+        return Resources.LoadAll<BuildingObjectBaseSO>("Scriptables/Buildables");
     }
 
     private void HandleDrawing()
     {
-        if (_selectedObj != null)
+        if (selectedObj != null)
         {
-            switch (_selectedObj.PlaceType)
+            switch (selectedObj.PlaceType)
             {
                 case PlaceType.Single:
                 default:
-                    if (_selectedObj.tag != null && _selectedObj.tag.Equals("PlayerStart"))
+                    if (selectedObj.tag != null && selectedObj.tag.Equals("PlayerStart"))
                     {
                         tilemap.SetTile(playerStartCellPosition, null);
                         playerStartCellPosition = _currentGridPosition;
                         playerStartPosition = tilemap.GetCellCenterWorld(_currentGridPosition);
                     }
-
-                    if (_selectedObj.GetType() == typeof(BuildingObjectInteractable)) // 버튼 등 상호작용 가능한 물체일 경우 (작업예정)
-                    {
-                        BuildingObjectInteractable selectedInteractable = (BuildingObjectInteractable)_selectedObj;
-                        Debug.Log(selectedInteractable.EventIndex);
-                    }
-                    DrawItem(tilemap);
+                    DrawSingle();
                     break;
                 case PlaceType.Line:
                     LineRenderer();
@@ -347,10 +336,10 @@ public class BuildingManager : Singleton<BuildingManager>
 
     private void HandleDrawRelease()
     {
-        if (_selectedObj != null)
+        if (selectedObj != null)
         {
-            if (_selectedObj.PlaceType == PlaceType.Line ||
-                _selectedObj.PlaceType == PlaceType.Rectangle)
+            if (selectedObj.PlaceType == PlaceType.Line ||
+                selectedObj.PlaceType == PlaceType.Rectangle)
             {
                 DrawBounds(tilemap);
                 previewTilemap.ClearAllTiles();
@@ -401,45 +390,50 @@ public class BuildingManager : Singleton<BuildingManager>
         {
             for (int y = bounds.yMin; y <= bounds.yMax; y++)
             {
-                Vector3Int position = new Vector3Int(x, y, 0);
-                targetMap.SetTile(position, _selectedObj.TileBase);
-                
-                if (targetMap != previewTilemap)
-                {
-                    tileInfo[targetMap].SetTileAtPosition(position, _selectedObj);
-                }
+                DrawTile(new Vector3Int(x, y, 0));
             }
         }
 
         if (targetMap != previewTilemap)
         {
-            BuildingHistoryItem item = new BuildingHistoryItem(BuildingHistoryType.Placing, targetMap, _selectedObj.TileBase,
-                Vector3Int.zero, Vector3Int.zero, bounds, false);
-            BuildingHistoryManager bh = BuildingHistoryManager.GetInstance();
-            bh.AddItem(item);
-            bh.ClearRedoStack();
+            AddHistory(targetMap, Vector3Int.zero, bounds);
         }
     }
 
-    private void DrawItem(Tilemap targetMap)
+    private void DrawSingle()
     {
-        targetMap.SetTile(_currentGridPosition, _selectedObj.TileBase);
+        DrawTile(_currentGridPosition);
+        
+        if (tilemap != previewTilemap)
+        {
+            AddHistory(tilemap, _currentGridPosition, null);
+        }
+    }
+    
+    private void DrawTile(Vector3Int position)
+    {
+        BuildingTile newTile = new BuildingTile(selectedObj, position);
+        
+        tilemap.SetTile(position, selectedObj.TileBase);
+        tileInfo[tilemap].SetTileAtPosition(position, newTile);
+    }
+
+    private void AddHistory(Tilemap targetMap, Vector3Int position, BoundsInt? bound)
+    {
         BuildingHistoryItem item = new BuildingHistoryItem(BuildingHistoryType.Placing, targetMap,
-            _selectedObj.TileBase, Vector3Int.zero, _currentGridPosition, new BoundsInt(), true);
+            selectedObj.TileBase, Vector3Int.zero, position, bound);
         BuildingHistoryManager bh = BuildingHistoryManager.GetInstance();
         bh.AddItem(item);
         bh.ClearRedoStack();
-        
-        tileInfo[targetMap].SetTileAtPosition(_currentGridPosition, _selectedObj);
     }
 
-    private BuildingObjectBase GetTileAtPosition(Vector3Int gridPosition)
+    private BuildingTile GetTileAtPosition(Vector3Int gridPosition)
     {
         foreach (Tilemap map in generatedTilemaps)
         {
             if (tileInfo[map].GetTileAtPosition(gridPosition) is not null)
             {
-                BuildingObjectBase tile = tileInfo[map].GetTileAtPosition(gridPosition);
+                BuildingTile tile = tileInfo[map].GetTileAtPosition(gridPosition);
                 if (tile is not null)
                 {
                     return tile;
@@ -452,16 +446,16 @@ public class BuildingManager : Singleton<BuildingManager>
 
 public class MapTileInfo // 각 타일맵의 모든 타일 정보를 기록하고 있는 딕셔너리 클래스
 {
-    private Dictionary<Vector3Int, BuildingObjectBase> tileInfo = new Dictionary<Vector3Int, BuildingObjectBase>();
+    private Dictionary<Vector3Int, BuildingTile> tileInfo = new Dictionary<Vector3Int, BuildingTile>();
 
-    public BuildingObjectBase GetTileAtPosition(Vector3Int gridPosition)
+    public BuildingTile GetTileAtPosition(Vector3Int gridPosition)
     {
-        BuildingObjectBase objectBase;
-        tileInfo.TryGetValue(gridPosition, out objectBase);
-        return objectBase;
+        BuildingTile tile;
+        tileInfo.TryGetValue(gridPosition, out tile);
+        return tile;
     }
 
-    public void SetTileAtPosition(Vector3Int gridPosition, BuildingObjectBase targetTile)
+    public void SetTileAtPosition(Vector3Int gridPosition, BuildingTile targetTile)
     {
         tileInfo[gridPosition] = targetTile;
     }

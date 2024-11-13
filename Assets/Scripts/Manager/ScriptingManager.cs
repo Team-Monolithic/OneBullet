@@ -40,9 +40,9 @@ public class ScriptingManager : Singleton<ScriptingManager>
     private Dictionary<EventCategorySO, Transform> eventCategorySlot = new Dictionary<EventCategorySO, Transform>();
     private Dictionary<ActionCategorySO, GameObject> actionCategories = new Dictionary<ActionCategorySO, GameObject>();
     private Dictionary<ActionCategorySO, Transform> actionCategorySlot = new Dictionary<ActionCategorySO, Transform>();
-    private BuildingObjectBase selectedTile;
+    private BuildingTile selectedTile;
 
-    public BuildingObjectBase SelectedTile
+    public BuildingTile SelectedTile
     {
         get => selectedTile;
         set => selectedTile = value;
@@ -54,21 +54,21 @@ public class ScriptingManager : Singleton<ScriptingManager>
         selectTileText.gameObject.SetActive(!selected);
     }
 
-    public void SetTileInfo(BuildingObjectBase buildingObjectBase)
+    public void SetTileInfo(BuildingTile buildingObjectBase)
     {
-        Tile tile = (Tile)buildingObjectBase.TileBase;
+        Tile tile = (Tile)buildingObjectBase.baseSO.TileBase;
         tileImage.GetComponent<Image>().sprite = tile.sprite;
-        tileName.GetComponent<TextMeshProUGUI>().text = buildingObjectBase.DisplayName;
+        tileName.GetComponent<TextMeshProUGUI>().text = buildingObjectBase.baseSO.DisplayName;
     }
 
-    public void SetTileEvents(BuildingObjectBase buildingObjectBase)
+    public void SetTileEvents(BuildingTile buildingTile)
     {
         foreach (Transform child in eventsParent)
         {
             Destroy(child.gameObject);
         }
         
-        foreach (Event tileEvent in buildingObjectBase.events)
+        foreach (Event tileEvent in buildingTile.events)
         {
             MakeEventUI(tileEvent);
         }
@@ -180,7 +180,7 @@ public class Event
     public EventSO eventSO;
     public Dictionary<string, EventProperty> properties = new Dictionary<string, EventProperty>(); // 이벤트가 갖는 프로퍼티의 실질 값
     public List<Action> actions = new List<Action>();
-    public BuildingObjectBase ownerTile; // 어떤 타일에 부착된 event인지
+    public BuildingTile ownerTile; // 어떤 타일에 부착된 event인지
 
     public void AddAction(Action inAction)
     {
@@ -196,7 +196,7 @@ public class Action
 
     public void executeAction()
     {
-        Debug.Log("action " + actionSO.ActionDisplayName + " executed");
+        // actionSO.Execute(in properties, ref ownerEvent.ownerTile);
     }
 }
 
