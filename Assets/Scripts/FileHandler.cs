@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 
+
+// todo : 맵 save/load 시 타일맵 데이터까지 저장 및 로드
 public static class FileHandler
 {
     public static void SaveListToJSON<T>(List<T> toSave, string filename) 

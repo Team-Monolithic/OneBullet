@@ -9,15 +9,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 91e13ed648029b44d82fb07eba84b698, type: 3}
-  m_Name: MoveTo
+  m_Script: {fileID: 11500000, guid: 8963dc0909053b240a316414a4c27ac8, type: 3}
+  m_Name: Move
   m_EditorClassIdentifier: 
   actionCategory: {fileID: 11400000, guid: 4812c45e015254d4e9742eb4575723a4, type: 2}
   actionType: 1
   actionDisplayName: Move To
   properties:
-  - name: Speed
-    type: 0
   - name: X
     type: 0
   - name: Y

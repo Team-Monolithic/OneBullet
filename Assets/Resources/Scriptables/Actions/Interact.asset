@@ -9,12 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e4c15faeb2b0c72479c0770820764ba3, type: 3}
-  m_Name: FireTrigger
+  m_Script: {fileID: 11500000, guid: 006120e490dc7034da2ff8298df14162, type: 3}
+  m_Name: Interact
   m_EditorClassIdentifier: 
-  actionCategory: {fileID: 11400000, guid: 775640e853594984d82f1767147db16e, type: 2}
-  actionType: 0
-  actionDisplayName: Fire Trigger
-  properties:
-  - name: TriggerNumber
-    type: 1
+  actionCategory: {fileID: 11400000, guid: 4812c45e015254d4e9742eb4575723a4, type: 2}
+  actionDisplayName: Interact
+  properties: []

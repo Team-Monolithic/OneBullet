@@ -196,7 +196,7 @@ public class Action
 
     public void executeAction()
     {
-        // actionSO.Execute(in properties, ref ownerEvent.ownerTile);
+        actionSO.Execute(in properties, ref ownerEvent.ownerTile);
     }
 }
 

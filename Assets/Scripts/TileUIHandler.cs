@@ -3,15 +3,15 @@ using UnityEngine.UI;
 
 public class TileUIHandler : MonoBehaviour
 {
-    [SerializeField] private BuildingObjectBase item;
+    [SerializeField] private BuildingObjectBaseSO baseSO;
     private Button _button;
 
     private BuildingManager buildingManager;
 
-    public BuildingObjectBase Item
+    public BuildingObjectBaseSO BaseSO
     {
-        get => item;
-        set => item = value;
+        get => baseSO;
+        set => baseSO = value;
     }
 
     private void Awake()
@@ -23,6 +23,6 @@ public class TileUIHandler : MonoBehaviour
 
     private void ButtonClicked()
     {
-        buildingManager.SelectObject(item);
+        buildingManager.selectedObj = baseSO;
     }
 }

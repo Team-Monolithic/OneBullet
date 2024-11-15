@@ -9,8 +9,9 @@ public class BuildingObjectInteractableSO : BuildingObjectBaseSO
     [SerializeField] private TileBase interactedTileBase;
     private bool currentState = false;
 
-    public void toggleState()
+    public void toggleState(ref BuildingTile tile)
     {
         currentState = !currentState;
+        BuildingManager.GetInstance().SetTileBase(tile, currentState ? interactedTileBase : TileBase);
     }
 }

@@ -12,11 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d4fc643fbd95a943b6315a2ef1055b0, type: 3}
   m_Name: TestButton
   m_EditorClassIdentifier: 
-  tilemap: {fileID: 11400000, guid: 53b2dee132f47e14aa459ca9a4008b34, type: 2}
+  tilemapSO: {fileID: 11400000, guid: 53b2dee132f47e14aa459ca9a4008b34, type: 2}
   tileCategory: {fileID: 11400000, guid: e3350be75b16d4e468f5d7edd5f4e70a, type: 2}
   tileBase: {fileID: 11400000, guid: 558e85573d8765e4798e7bf70d4df706, type: 2}
   placeType: 1
   displayName: Test Button
   tag: 
-  interactionActions: []
-  eventIndex: 1
+  interactedTileBase: {fileID: 0}

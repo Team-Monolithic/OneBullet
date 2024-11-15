@@ -413,9 +413,15 @@ public class BuildingManager : Singleton<BuildingManager>
     private void DrawTile(Vector3Int position)
     {
         BuildingTile newTile = new BuildingTile(selectedObj, position);
-        
+        newTile.position = position;
         tilemap.SetTile(position, selectedObj.TileBase);
         tileInfo[tilemap].SetTileAtPosition(position, newTile);
+    }
+
+    public void SetTileBase(BuildingTile targetTile, TileBase tileBase)
+    {
+        Tilemap map = tilemaps[targetTile.baseSO.TilemapSO];
+        map.SetTile(targetTile.position, tileBase);
     }
 
     private void AddHistory(Tilemap targetMap, Vector3Int position, BoundsInt? bound)
